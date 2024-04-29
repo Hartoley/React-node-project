@@ -8,7 +8,7 @@ const {admindash, getadminsignup, adminsignup, getadminlogin} = require("../Cont
 router.get('/', admindash)
 router.get('/admindash',  getadminsignup)
 router.get('/admin/login', getadminlogin)
-router.post('/admin/register', validate(adminvalidator), adminsignup)
+router.post('/admin/register', adminsignup)
 
 
 

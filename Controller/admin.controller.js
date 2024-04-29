@@ -6,7 +6,7 @@ const adminsignup = async(req, res) =>{
     try {
         console.log( req.body, "body");
         const {username, email, password} = req.body
-        if (username == "" || password == "" || email == "") {
+        if (username === "" || password === "" || email === "") {
            res.status(402).send({message:"input fields cannot be empty", status: false}) 
         }
     
