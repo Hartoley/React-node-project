@@ -73,7 +73,7 @@ const getadminlogin =(req, res) =>{
 const getData = (req, res) => {
   const data = adminmodel.find({})
   console.log(data);
-  res.send("data received")
+  res.send("data received", data)
 }
 
 module.exports = {admindash, adminsignup, getadminsignup, getadminlogin, adminlogin, getData}
