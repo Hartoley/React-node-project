@@ -70,26 +70,10 @@ const getadminlogin =(req, res) =>{
   res.render("adminlogin")
 }
 
-
-
-const getData = async (req, res) => {
-  try {
-    const data = await adminmodel.find({});
-    console.log(data);
-    data.forEach((admin) => {
-      console.log(admin.username);
-    });
-    res.status(200).send(data); 
-  } catch (err) {
-    console.error(err);
-    res.status(500).send({ message: 'Internal server error' });
-  }
-};
-
-
-
-
-
-
+const getData = (req, res) => {
+  const data = adminmodel.find({})
+  console.log(data);
+  res.send("data received", data)
+}
 
 module.exports = {admindash, adminsignup, getadminsignup, getadminlogin, adminlogin, getData}
