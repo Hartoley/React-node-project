@@ -7,6 +7,11 @@ const adminschema = new mongoose.Schema({
   password: { type: String, required: true, trim: true },
 });
 
+const adimloginschema = new mongoose.Schema({
+  email: { type: String, unique: true, required: true, trim: true },
+  password: { type: String, required: true, trim: true },
+});
+
 let saltRound = 10;
 
 adminschema.pre("save", function (next) {
@@ -23,4 +28,5 @@ adminschema.pre("save", function (next) {
 });
 
 const adminmodel = mongoose.model("admin_collection", adminschema);
-module.exports = adminmodel;
+const adminlogmodel = mongoose.model("adminlog_collection", adimloginschema)
+module.exports = {adminmodel, adminlogmodel}
