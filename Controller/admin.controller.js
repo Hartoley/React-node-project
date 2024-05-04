@@ -1,6 +1,7 @@
 const { adminvalidator } = require("../Middleware/adminvalidator");
-const adminmodel = require("../Model/admin.model")
-const adminlogmodel = require("../Model/admin.model")
+const {adminmodel, adminlogmodel} = require("../Model/admin.model")
+const bcrypt = require("bcryptjs")
+
 
 
 const adminsignup = async(req, res) =>{
@@ -38,9 +39,10 @@ const adminsignup = async(req, res) =>{
     }
     
 const adminlogin = async (req, res)=>{
+  const {email, password} = req.body
+  console.log(req.body);
   try {
     const {email, password} = req.body
-    console.log(req.body);
     if (email=="" || password =="") {
       res.status(401).send({message:'input filed cannot be empty', status: false})
     }
@@ -49,14 +51,16 @@ const adminlogin = async (req, res)=>{
       res.status(403).send({message: 'user not found', status: false})
     }
     const hashpassword = await bcrypt.compare(password, admin.password);
-    
-    if (!hashpassword) {
+    if (hashpassword) {
+      console.log("matched");
+    } else if (!hashpassword) {
       res.status(405).send({message: 'invalid password', status: false})
     }
     const adminemail = admin.email
     const inalrealdy = await adminlogmodel.findOne({email:email})
     if (inalrealdy) {
       console.log("In Ok!!!");
+    
     } 
     const loggedinadmins = await adminlogmodel.create({email, password})
     if (!loggedinadmins) {
@@ -65,7 +69,8 @@ const adminlogin = async (req, res)=>{
     
     res.status(200).send({message:'admin logged in successful', status: true, adminemail})
   } catch (error) {
-    res.status(408).send({message: 'internal server error'})
+    console.log(error);
+    return res.status(408).send({message: 'internal server error'})
   }
 }
 
@@ -101,21 +106,23 @@ const getData = async (req, res) => {
 };
 
 const getloggin = async (req, res) => {
-    try {
-      const admindata = await adminlogmodel.find({});
-      if (data.length === 0) {
-        console.log('No data found');
-        res.status(404).send({ message: 'No data found' });
-      } else {
-        console.log(data);
-        data.forEach((admin) => {
-          console.log(admin.username);
-        });
-        res.status(200).send(data); 
-      }
-    } catch (error) {
-      
+  try {
+    const admindata = await adminlogmodel.find({});
+    if (admindata.length == 0) {
+      console.log('No data found');
+      res.status(404).send({ message: 'No data found' });
+    } else {
+      console.log(admindata); 
+      admindata.forEach((admin) => {
+        console.log(admin.username);
+      });
+      res.status(200).send(admindata);
     }
-}
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Internal server error' });
+  }
+};
+
 
 module.exports = {admindash, adminsignup, getadminsignup, getadminlogin, adminlogin, getData, getloggin}
