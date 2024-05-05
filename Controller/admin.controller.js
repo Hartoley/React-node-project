@@ -6,7 +6,7 @@ const bcrypt = require("bcryptjs")
 
 const adminsignup = async(req, res) =>{
     try {
-        console.log( req.body, "body");
+        // console.log( req.body, "body");
         const {username, email, password} = req.body
         if (username === "" || password === "" || email === "") {
            res.status(402).send({message:"input fields cannot be empty", status: false}) 
@@ -25,7 +25,7 @@ const adminsignup = async(req, res) =>{
          if (!admin) {
             res.status(409).send({message:"unable to save user", status:false})
          }
-         
+        
          return res.status(200).send({message:"user signed up successfully", status:true})
     
     }catch(error){
@@ -37,42 +37,44 @@ const adminsignup = async(req, res) =>{
     
     }
     }
+  
     
-const adminlogin = async (req, res)=>{
-  const {email, password} = req.body
-  console.log(req.body);
-  try {
-    const {email, password} = req.body
-    if (email=="" || password =="") {
-      res.status(401).send({message:'input filed cannot be empty', status: false})
-    }
-    const admin = await adminmodel.findOne({email:email})
-    if (!admin) {
-      res.status(403).send({message: 'user not found', status: false})
-    }
-    const hashpassword = await bcrypt.compare(password, admin.password);
-    if (hashpassword) {
-      console.log("matched");
-    } else if (!hashpassword) {
-      res.status(405).send({message: 'invalid password', status: false})
-    }
-    const adminemail = admin.email
-    const inalrealdy = await adminlogmodel.findOne({email:email})
-    if (inalrealdy) {
-      console.log("In Ok!!!");
+    const adminlogin = async (req, res) => {
+      const { email, password } = req.body;
+      // console.log(req.body);
+      try {
+        if (email === "" || password === "") {
+          return res.status(401).send({ message: 'input fields cannot be empty', status: false });
+        }
     
-    } 
-    const loggedinadmins = await adminlogmodel.create({email, password})
-    if (!loggedinadmins) {
-      console.log("Saving logged in admin failed");
+        const admin = await adminmodel.findOne({ email: email });
+        if (!admin) {
+          return res.status(403).send({ message: 'user not found', status: false });
+        }
+    
+        const hashpassword = await bcrypt.compare(password, admin.password);
+        if (!hashpassword) {
+          return res.status(405).send({ message: 'invalid password', status: false });
+        }
+    
+        const adminemail = admin.email;
+        const inalrealdy = await adminlogmodel.findOne({ email: email });
+  
+        if (!inalrealdy) {
+          const loggedinadmins = await adminlogmodel.create({ email, password });
+          console.log("It was a success");
+          if (!loggedinadmins) {
+            console.log("Saving logged in admin failed");
+          }
+        }
+        return res.status(200).send({ message: 'admin logged in successful', status: true, adminemail });
+       
+      }catch (error) {
+        console.log(error);
+        return res.status(408).send({ message: 'internal server error' });
+      }
     }
     
-    res.status(200).send({message:'admin logged in successful', status: true, adminemail})
-  } catch (error) {
-    console.log(error);
-    return res.status(408).send({message: 'internal server error'})
-  }
-}
 
 const admindash = (req, res)=>{
     res.render("index")
