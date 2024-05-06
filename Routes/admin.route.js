@@ -15,5 +15,4 @@ router.get('/admin/getlogin/:id', getloggin)
 
 
 
-
 module.exports = router
