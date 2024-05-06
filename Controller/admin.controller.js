@@ -126,25 +126,9 @@ const getloggin = async (req, res) => {
   }
 };
 
-const getlogginId = async (req, res) => {
-  try {
-    const { id } = req.params; // Assuming the ID is sent as a URL parameter
-    const admindata = await adminlogmodel.findById(id); // Find admin data by ID
-
-    if (!admindata) { // If no data is found
-      console.log('No data found');
-      return res.status(404).send({ message: 'No data found' });
-    }
-
-    console.log(admindata); // Log the admin data
-    res.status(200).send(admindata); // Send the admin data as response
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ message: 'Internal server error' });
-  }
-};
 
 
 
 
-module.exports = {getlogginId, admindash, adminsignup, getadminsignup, getadminlogin, adminlogin, getData, getloggin}
+
+module.exports = { admindash, adminsignup, getadminsignup, getadminlogin, adminlogin, getData, getloggin}
