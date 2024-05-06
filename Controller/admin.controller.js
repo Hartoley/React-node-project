@@ -147,4 +147,4 @@ const getlogginId = async (req, res) => {
 
 
 
-module.exports = {admindash, adminsignup, getadminsignup, getadminlogin, adminlogin, getData, getloggin}
+module.exports = {getlogginId, admindash, adminsignup, getadminsignup, getadminlogin, adminlogin, getData, getloggin}
