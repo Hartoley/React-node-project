@@ -67,7 +67,7 @@ const adminsignup = async(req, res) =>{
             console.log("Saving logged in admin failed");
           }
         }
-        return res.status(200).send({ message: 'admin logged in successful', status: true, adminemail });
+        return res.status(200).send({ message: 'admin logged in successful', status: true, adminemail , });
        
       }catch (error) {
         console.log(error);
@@ -110,7 +110,7 @@ const getData = async (req, res) => {
 const getloggin = async (req, res) => {
   try {
     const admindata = await adminlogmodel.find({});
-    if (admindata.length == 0) {
+    if (admindata.length === 0) {
       console.log('No data found');
       res.status(404).send({ message: 'No data found' });
     } else {
@@ -125,6 +125,7 @@ const getloggin = async (req, res) => {
     res.status(500).send({ message: 'Internal server error' });
   }
 };
+
 
 
 module.exports = {admindash, adminsignup, getadminsignup, getadminlogin, adminlogin, getData, getloggin}

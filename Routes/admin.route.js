@@ -11,7 +11,7 @@ router.get('/admin/dashlogin', getadminlogin)
 router.post('/admin/register', adminsignup)
 router.post('/admin/login', adminlogin)
 router.get('/admin/getdata', getData)
-router.get('/admin/getlogin', getloggin)
+router.get('/admin/getlogin/:id', getloggin)
 
 
 
