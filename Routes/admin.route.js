@@ -12,6 +12,7 @@ router.post('/admin/register', adminsignup)
 router.post('/admin/login', adminlogin)
 router.get('/admin/getdata', getData)
 router.get('/admin/getlogin/:id', getloggin)
+router.get('/admin/getloginid', getlogginId)
 
 
 
