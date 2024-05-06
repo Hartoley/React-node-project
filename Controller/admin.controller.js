@@ -109,7 +109,7 @@ const getData = async (req, res) => {
 
 const getloggin = async (req, res) => {
   try {
-    const admindata = await adminlogmodel.find({});
+    const admindata = await adminlogmodel.findOne({});
     if (admindata.length === 0) {
       console.log('No data found');
       res.status(404).send({ message: 'No data found' });
