@@ -10,7 +10,9 @@ app.use(bodyParser.json())
 app.use(cors({origin:"*"}))
 app.use(bodyParser.urlencoded({extended:true, limit:"100mb"}))
 const adminrouter = require('./Routes/admin.route')
+const studentrouter = require('./Routes/student.route')
 app.use('/', adminrouter)
+app.use('/udemy', studentrouter)
 
 
 

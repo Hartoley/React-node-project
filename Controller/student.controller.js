@@ -1,10 +1,10 @@
 const { adminvalidator } = require("../Middleware/adminvalidator");
-const {adminmodel, adminlogmodel} = require("../Model/admin.model")
+const {studentmodel, studentlogmodel} = require("../Model/student.model")
 const bcrypt = require("bcryptjs")
 
 
 
-const adminsignup = async(req, res) =>{
+const studentsignup = async(req, res) =>{
     try {
         // console.log( req.body, "body");
         const {username, email, password} = req.body
@@ -16,13 +16,13 @@ const adminsignup = async(req, res) =>{
         if (!validate) {
           res.status(400).send({message:"unable to validate user", status: false}) 
         }
-        const existinguser = await adminmodel.findOne({email:email})
+        const existinguser = await studentmodel.findOne({email:email})
          console.log(existinguser);
          if (existinguser) {
             res.status(405).send({message:"user already exist", status:false})
          }
-         const admin = await adminmodel.create({username, email, password})
-         if (!admin) {
+         const student = await studentmodel.create({username, email, password})
+         if (!student) {
             res.status(409).send({message:"unable to save user", status:false})
          }
         
@@ -38,8 +38,7 @@ const adminsignup = async(req, res) =>{
     }
     }
   
-    
-    const adminlogin = async (req, res) => {
+    const studentlogin = async (req, res) => {
       const { email, password } = req.body;
       // console.log(req.body);
       try {
@@ -47,27 +46,27 @@ const adminsignup = async(req, res) =>{
           return res.status(401).send({ message: 'input fields cannot be empty', status: false });
         }
     
-        const admin = await adminmodel.findOne({ email: email });
-        if (!admin) {
+        const student = await studentmodel.findOne({ email: email });
+        if (!student) {
           return res.status(403).send({ message: 'user not found', status: false });
         }
-    
-        const hashpassword = await bcrypt.compare(password, admin.password);
+
+        const hashpassword = await bcrypt.compare(password,student.password);
         if (!hashpassword) {
           return res.status(405).send({ message: 'invalid password', status: false });
         }
     
-        const adminemail = admin.email;
-        const inalrealdy = await adminlogmodel.findOne({ email: email });
+        const studentemail = student.email;
+        const inalrealdy = await studentlogmodel.findOne({ email: email });
   
         if (!inalrealdy) {
-          const loggedinadmins = await adminlogmodel.create({ email, password });
+          const loggedinstudents = await studentlogmodel.create({ email, password });
           console.log("It was a success");
-          if (!loggedinadmins) {
-            console.log("Saving logged in admin failed");
+          if (!loggedinstudents) {
+            console.log("Saving logged in student failed");
           }
         }
-        return res.status(200).send({ message: 'admin logged in successful', status: true, adminemail , });
+        return res.status(200).send({ message: 'student logged in successful', status: true, studentemail , });
        
       }catch (error) {
         console.log(error);
@@ -76,28 +75,28 @@ const adminsignup = async(req, res) =>{
     }
     
 
-const admindash = (req, res)=>{
-    res.render("index")
+const studentdash = (req, res)=>{
+    res.render("index12")
 }
 
-const getadminsignup = (req, res) =>{
-    res.render("admin")
+const getstudentsignup = (req, res) =>{
+    res.render("studentsignup")
 }
 
-const getadminlogin =(req, res) =>{
-  res.render("adminlogin")
+const getstudentlogin =(req, res) =>{
+  res.render("studentlogin")
 }
 
 const getData = async (req, res) => {
   try {
-    const data = await adminmodel.find({});
+    const data = await studentmodel.find({});
     if (data.length === 0) {
       console.log('No data found');
       res.status(404).send({ message: 'No data found' });
     } else {
       console.log(data);
-      data.forEach((admin) => {
-        console.log(admin.username);
+      data.forEach((student) => {
+        console.log(student.username);
       });
       res.status(200).send(data); 
     }
@@ -110,16 +109,16 @@ const getData = async (req, res) => {
 const getloggin = async (req, res) => {
   try {
     // const admindata = await adminlogmodel.findById(req.params.id);
-    const admindata = await adminlogmodel.find({});
-    if (admindata.length === 0) {
+    const studentdata = await studentmodel.find({});
+    if (studentdata.length === 0) {
       console.log('No data found');
       res.status(404).send({ message: 'No data found' });
     } else {
-      console.log(admindata); 
-      admindata.forEach((admin) => {
-        console.log(admin.username);
+      console.log(studentdata); 
+      studentdata.forEach((student) => {
+        console.log(student.username);
       });
-      res.status(200).send(admindata);
+      res.status(200).send(studentdata);
     }
   } catch (error) {
     console.error(error);
@@ -131,22 +130,18 @@ const getloggin = async (req, res) => {
 const updaterId = async (req, res) =>{
   try {
    const email = req.params.id;
-   const adminIn = await adminmodel.findOne({ email });
-   if (!adminIn) {
-     return res.status(404).send("Admin not found");
+   const studentIn = await studentmodel.findOne({ email });
+   if (!studentIn) {
+     return res.status(404).send("student not found");
    }
 
-   res.send(adminIn);
+   res.send(studentIn);
   } catch (error) {
-   return res.status(408).send("Admin not found shoooo");
+   return res.status(408).send("student not found shoooo");
   }
 }
 
 
 
 
-
-
-
-
-module.exports = { admindash, adminsignup, getadminsignup, getadminlogin, adminlogin, getData, getloggin, updaterId}
+module.exports = {studentsignup, updaterId, getloggin, studentlogin, getData, getstudentlogin, getstudentsignup, studentdash}

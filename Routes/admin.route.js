@@ -2,7 +2,7 @@ const express = require("express")
 const router = express.Router()
 const {validate} = require("../Middleware/validator")
 const {adminvalidator} = require ("../Middleware/adminvalidator")
-const {admindash, getadminsignup, adminsignup, getadminlogin, getData, adminlogin, getloggin } = require("../Controller/admin.controller")
+const {admindash, getadminsignup, adminsignup, getadminlogin, getData, adminlogin, getloggin, updaterId} = require("../Controller/admin.controller")
 
 
 router.get('/', admindash)
@@ -11,6 +11,7 @@ router.get('/admin/dashlogin', getadminlogin)
 router.post('/admin/register', adminsignup)
 router.post('/admin/login', adminlogin)
 router.get('/admin/getdata', getData)
+router.get('/admin/getdata/id/:id', updaterId)
 router.get('/admin/getlogin/:id', getloggin)
 
 
