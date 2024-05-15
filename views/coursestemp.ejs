@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div className="postVideos">
+        <form class="mx-auto shadow w-50 px-5 py-3 mt-3" method="post" action="/courses/upload/video" enctype="multipart/form-data">
+            <p>Video title</p>
+            <input type="text" name="video_title">
+            <p>Video sub-Title</p>
+            <input type="text" name="sub_title">
+            <input type="file" name="video_url" />
+            <button type="submit">Upload video</button>
+    
+        </form>
+
+        <form class="mx-auto shadow w-50 px-5 py-3 mt-3" method="post" action="/courses/upload/course">
+        <p>Title</p>
+        <input type="text" placeholder='title' name='title' />
+        <p>Sub-Title</p>
+        <input type="text" placeholder='subtitle' name='subtitle'/>
+        <p>Language</p>
+        <input type="text" placeholder='Language' name='language'/>
+        <p>What you will learn</p>
+        <input type="text" placeholder='What to learn' name="learn"/>
+        <p>Requirements</p>
+        <input type="text" placeholder='Requirement' name="requirements"/>
+        <p>Descriptions</p>
+        <textarea name="Descriptions" name="description" id=""></textarea>
+        <p>Author's name</p>
+        <input type="text" placeholder='Authors name' name="authors_name" />
+        <p>Price</p>
+        <input type="number"  placeholder='Price' name="price"/>
+        <button>Save</button>
+
+        
+        
+        <button type="submit">Save</button>
+    </form>    
+ 
+      </div>
+
+</body>
+</html>

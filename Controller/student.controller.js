@@ -5,38 +5,38 @@ const bcrypt = require("bcryptjs")
 
 
 const studentsignup = async(req, res) =>{
-    try {
-        // console.log( req.body, "body");
-        const {username, email, password} = req.body
-        if (username === "" || password === "" || email === "") {
-           res.status(402).send({message:"input fields cannot be empty", status: false}) 
-        }
-    
-        const validate = await adminvalidator.validate(req.body)
-        if (!validate) {
-          res.status(400).send({message:"unable to validate user", status: false}) 
-        }
-        const existinguser = await studentmodel.findOne({email:email})
-         console.log(existinguser);
-         if (existinguser) {
-            res.status(405).send({message:"user already exist", status:false})
-         }
-         const student = await studentmodel.create({username, email, password})
-         if (!student) {
-            res.status(409).send({message:"unable to save user", status:false})
-         }
-        
-         return res.status(200).send({message:"user signed up successfully", status:true})
-    
-    }catch(error){
-      console.log(error);
-      if (error) {
-        res.status(407).send({message:error.message})
+  try {
+      // console.log( req.body, "body");
+      const {username, email, password} = req.body
+      if (username === "" || password === "" || email === "") {
+         res.status(402).send({message:"input fields cannot be empty", status: false}) 
       }
-      return res.status(500).send({message:'internal server error'})
-    
+  
+      const validate = await adminvalidator.validate(req.body)
+      if (!validate) {
+        res.status(400).send({message:"unable to validate user", status: false}) 
+      }
+      const existinguser = await studentmodel.findOne({email:email})
+       console.log(existinguser);
+       if (existinguser) {
+          res.status(405).send({message:"user already exist", status:false})
+       }
+       const student = await studentmodel.create({username, email, password})
+       if (!student) {
+          res.status(409).send({message:"unable to save user", status:false})
+       }
+
+       return res.status(200).send({message:"user signed up successfully", status:true})
+  
+  }catch(error){
+    console.log(error);
+    if (error.code === 11000) {
+      res.status(409).send({message:"user already exists with this email"})
+    } else {
+      res.status(500).send({message:'internal server error'})
     }
-    }
+  }
+}
   
     const studentlogin = async (req, res) => {
       const { email, password } = req.body;
@@ -51,7 +51,7 @@ const studentsignup = async(req, res) =>{
           return res.status(403).send({ message: 'user not found', status: false });
         }
 
-        const hashpassword = await bcrypt.compare(password,student.password);
+        const hashpassword = await bcrypt.compare( password, student.password);
         if (!hashpassword) {
           return res.status(405).send({ message: 'invalid password', status: false });
         }
@@ -108,7 +108,7 @@ const getData = async (req, res) => {
 
 const getloggin = async (req, res) => {
   try {
-    // const admindata = await adminlogmodel.findById(req.params.id);
+    
     const studentdata = await studentmodel.find({});
     if (studentdata.length === 0) {
       console.log('No data found');
@@ -141,7 +141,27 @@ const updaterId = async (req, res) =>{
   }
 }
 
+const getallstudents = async (req, res) =>{
+  try {
+    const allstudents = await studentmodel.find({});
+
+    if (allstudents.length === 0) {
+      console.log('No data found');
+      res.status(404).send({ message: 'No data found' });
+    } else {
+      
+      allstudents.forEach((students) => {
+        console.log(students.username);
+      });
+      res.status(200).send(allstudents); 
+    }
+  } catch (error) {
+    console.log(error );
+    res.status(500).send({ message: 'Error getting all students' });
+  }
+}
 
 
 
-module.exports = {studentsignup, updaterId, getloggin, studentlogin, getData, getstudentlogin, getstudentsignup, studentdash}
+
+module.exports = {studentsignup, updaterId, getloggin, studentlogin, getallstudents, getData, getstudentlogin, getstudentsignup, studentdash}

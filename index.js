@@ -9,10 +9,13 @@ app.set("view engine", "ejs")
 app.use(bodyParser.json())
 app.use(cors({origin:"*"}))
 app.use(bodyParser.urlencoded({extended:true, limit:"100mb"}))
+const multer = require('multer')
 const adminrouter = require('./Routes/admin.route')
 const studentrouter = require('./Routes/student.route')
+const courserouter = require ('./Routes/courses.route')
 app.use('/', adminrouter)
 app.use('/udemy', studentrouter)
+app.use('/courses', courserouter)
 
 
 

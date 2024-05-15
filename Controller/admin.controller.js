@@ -11,7 +11,7 @@ const adminsignup = async(req, res) =>{
         if (username === "" || password === "" || email === "") {
            res.status(402).send({message:"input fields cannot be empty", status: false}) 
         }
-    
+  
         const validate = await adminvalidator.validate(req.body)
         if (!validate) {
           res.status(400).send({message:"unable to validate user", status: false}) 
