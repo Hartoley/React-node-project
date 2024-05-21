@@ -13,19 +13,16 @@ const getcourses =(req, res) =>{
 
 const updateCourse = async (req, res) => {
     try {
-      const {title, language, learn, requirements, description,authors_name, price } = req.body;
+      const {title, sub_title, language, learn, requirements, description,authors_name, price } = req.body;
       const courseExist = await coursemodel.findOne({ title: title });
       if (courseExist) {
         res.status(404).send({ message: "Course exists", status: false });
       }
 
-      
-  
       const newCourse = await coursemodel.create( {
-        
         title,
+        sub_title,
         language,
-        authors_name,
         learn,
         requirements,
         description,
@@ -50,11 +47,10 @@ const updateCourse = async (req, res) => {
   const uploadVideos = async (req, res) => {
     const { video_title, video_subtitle, video_url } = req.body;
     try {
-      console.log(video_url);
       console.log(video_title);
       console.log(video_subtitle);
-      const uploadedVideo = video_url;
-      if (!video_url) {
+      const uploadedVideo = req.file;
+      if (!uploadedVideo) {
         return res.status(400).json({ message: 'Please select a video to upload' });
       }
  
@@ -63,7 +59,7 @@ const updateCourse = async (req, res) => {
       const videoUrl = uploadResult.secure_url;
       const course = await coursemodel.findOneAndUpdate(
         { title: video_title },
-        { $push: { videos: { title: video_title, subtitle: video_subtitle, url: videoUrl } } }, 
+        { $push: { videos: { subtitle: video_subtitle, url: video_url } } }, 
         { new: true }
       );
   
