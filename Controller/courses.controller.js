@@ -1,99 +1,81 @@
 const { adminvalidator } = require("../Middleware/adminvalidator");
-const {studentmodel, studentlogmodel} = require("../Model/student.model")
 const bcrypt = require("bcryptjs")
 const upload = require('../utils/mutler')
 const {coursemodel} = require ('../Model/courses.model')
 const {cloudinary} =require('../utils/clodinary')
-const multer = require('../utils/mutler')
+
+
 
 
 const getcourses =(req, res) =>{
     res.render("coursestemp")
   }
 
-  const uploadvideo = async (req, res) => {
+const updateCourse = async (req, res) => {
     try {
-      const { video_title, sub_title } = req.body;
-      console.log(video_title);
-      console.log (sub_title);
-      console.log(req.file);
-      const file = req.file;
-      console.log(file);
+      const {title, language, learn, requirements, description,authors_name, price } = req.body;
+      const courseExist = await coursemodel.findOne({ title: title });
+      if (courseExist) {
+        res.status(404).send({ message: "Course exists", status: false });
+      }
 
-      if (!video_title || !sub_title ) {
-        res.status(400).send({ message: 'Missing required fields', status: false });
-        return;
-      }
-      if (!file) {
-        res.status(400).send({ message: 'Missing Video file', status: false });
-        return;
-      }
+      
   
+      const newCourse = await coursemodel.create( {
+        
+        title,
+        language,
+        authors_name,
+        learn,
+        requirements,
+        description,
+        authors_name,
+        price}
+      
+      )
+        
+     
   
-      const uploder = await cloudinary.uploader.upload(req.file.buffer, {
-        resource_type: 'video',
-      });
-  
-      if (!uploder) {
-        res.status(400).send({ message: 'Error uploading video', status: false });
-        return;
-      }
-  
-      const existingcourse = await coursemodel.findOne({ video_title: video_title });
-  
-      if (existingcourse) {
-        res.status(405).send({ message: 'Course already exists', status: false });
-        return;
+      if (!newCourse) {
+        res.status(404).send({ message: "error creating course", status: false });
       }
   
-      const course = await coursemodel.create({
-        video_title,
-        sub_title,
-        video_url: uploder.secure_url,
-      });
-  
-      if (!course) {
-        res.status(409).send({ message: 'Unable to upload course', status: false });
-        return;
-      }
-  
-      res.status(200).send({ message: 'Course uploaded', status: true, url: uploder.secure_url });
+      res.status(200).send({ message: "Course created", status: true });
     } catch (error) {
       console.log(error);
       res.status(500).send({ message: error.message });
     }
   };
 
-  const updateCourse = async (req, res) => {
+  const uploadVideos = async (req, res) => {
+    const { video_title, video_subtitle, video_url } = req.body;
     try {
-      // const { id } = req.params;
-      const { authors_name, language, learn, requirements, description, price } = req.body;
+      console.log(video_url);
+      console.log(video_title);
+      console.log(video_subtitle);
+      const uploadedVideo = video_url;
+      if (!video_url) {
+        return res.status(400).json({ message: 'Please select a video to upload' });
+      }
+ 
+      const uploadResult = await cloudinary.uploader.upload(uploadedVideo.path);
   
-      const updatedCourse = await coursemodel.updateOne(
-        { video_title: title },
-        {
-          $set: {
-            title,
-            subtitle,
-            authors_name,
-            language,
-            learn,
-            requirements,
-            description,
-            price,
-          },
-        }
+      const videoUrl = uploadResult.secure_url;
+      const course = await coursemodel.findOneAndUpdate(
+        { title: video_title },
+        { $push: { videos: { title: video_title, subtitle: video_subtitle, url: videoUrl } } }, 
+        { new: true }
       );
   
-      if (!updatedCourse) {
-        res.status(404).send({ message: "Course not found", status: false });
+      if (!course) {
+        return res.status(404).json({ message: 'Course not found' });
       }
   
-      res.status(200).send({ message: "Course updated", status: true });
+      res.status(200).json({ message: 'Video uploaded and course updated successfully', videoUrl });
     } catch (error) {
-      console.log(error);
-      res.status(500).send({ message: error.message });
-    }
+      console.error(error);
+      res.status(500).json({ message: 'Error uploading video', error });
+    } 
   };
 
-  module.exports={getcourses, uploadvideo, updateCourse}
+  module.exports={getcourses, updateCourse, uploadVideos}

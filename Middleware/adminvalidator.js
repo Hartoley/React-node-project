@@ -7,4 +7,19 @@ const adminvalidator = yup.object().shape({
     password: yup.string().min(5, 'password is too short').matches(`^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-])` , "password must have at least one capital letter, an integer and a special character").required('password is required')
 })
 
-module.exports = {adminvalidator}
+
+function errorHandler(err, req, res, next) {
+    console.error(err); 
+  
+    if (err instanceof multer.MulterError) {
+     
+      return res.status(400).json({ message: err.message });
+    } else {
+     
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+  
+  
+
+module.exports = {adminvalidator,  errorHandler}
