@@ -7,7 +7,7 @@ const { getcourses, updateCourse, uploadVideos } = require("../Controller/course
 
 router.get('/courses', getcourses)
 router.post('/upload/course', updateCourse)
-router.post('/upload/video', uploadVideos)
+router.post('/upload/video', upload.single('video_url'), uploadVideos)
 
 
 

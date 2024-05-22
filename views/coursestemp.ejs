@@ -12,9 +12,9 @@
             <input type="text" name="video_title">
             <p>Video sub-Title</p>
             <input type="text" name="sub_title">
-            <input type="file" name="video_url" />
+            <input type="file" name="video_url" accept="video/*" />
             <button type="submit">Upload video</button>
-    
+
         </form>
 
         <form class="mx-auto shadow w-50 px-5 py-3 mt-3" method="post" action="/courses/upload/course">
@@ -29,15 +29,13 @@
         <p>Requirements</p>
         <input type="text" placeholder='Requirement' name="requirements"/>
         <p>Descriptions</p>
-        <textarea name="Descriptions" name="description" id=""></textarea>
+        <textarea name="Descriptions"  id=""></textarea>
         <p>Author's name</p>
         <input type="text" placeholder='Authors name' name="authors_name" />
         <p>Price</p>
         <input type="number"  placeholder='Price' name="price"/>
         <button>Save</button>
 
-        
-        
         <button type="submit">Save</button>
     </form>    
  

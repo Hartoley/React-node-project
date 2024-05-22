@@ -130,8 +130,8 @@ const getloggin = async (req, res) => {
 
 const updaterId = async (req, res) =>{
   try {
-   const email = req.params.id;
-   const adminIn = await adminmodel.findOne({ email });
+   const admin = req.params.id;
+   const adminIn = await adminmodel.findById(admin);
    if (!adminIn) {
      return res.status(404).send("Admin not found");
    }
