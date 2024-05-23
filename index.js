@@ -21,7 +21,6 @@ app.use('/courses', courserouter)
 
 
 
-
 const port = process.env.PORT || 5008
 const uri = process.env.MONGODB_URI
 
