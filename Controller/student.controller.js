@@ -129,8 +129,8 @@ const getloggin = async (req, res) => {
 
 const updaterId = async (req, res) =>{
   try {
-   const email = req.params.id;
-   const studentIn = await studentmodel.findOne({ email });
+   const student = req.params.id;
+   const studentIn = await studentmodel.findById(student);
    if (!studentIn) {
      return res.status(404).send("student not found");
    }
