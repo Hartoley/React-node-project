@@ -69,7 +69,7 @@ const getcourses =(req, res) =>{
         description,
         authors_name,
         price,
-        url: videoUrl
+        previewVideo: videoUrl
       });
   
       if (!newCourse) {
@@ -126,7 +126,8 @@ const getcourses =(req, res) =>{
 
       const updatedCourse = await coursemodel.findByIdAndUpdate(
         course._id,
-        { $push: { videos: { sub_title, url: videoUrl } } },
+        { $push: { videos: { sub_title,
+           url: videoUrl } } },
         { new: true }
       );
   
