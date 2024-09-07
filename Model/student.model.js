@@ -1,10 +1,12 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
+const { object } = require("yup");
 
 const studentschema = new mongoose.Schema({
   username: { type: String, required: true, unique: true, trim: true },
   email: { type: String, unique: true, required: true, trim: true },
   password: { type: String, required: true, trim: true },
+  courses: [{type: Object, trim: true}],
 });
 
 const stdloginschema = new mongoose.Schema({
@@ -13,7 +15,6 @@ const stdloginschema = new mongoose.Schema({
 });
 
 let saltRound = 10;
-
 studentschema.pre("save", function (next) {
   console.log(this.password);
   bcrypt

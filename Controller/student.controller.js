@@ -1,6 +1,7 @@
 const { adminvalidator } = require("../Middleware/adminvalidator");
 const {studentmodel, studentlogmodel} = require("../Model/student.model")
 const bcrypt = require("bcryptjs")
+const axios = require('axios')
 
 
 
@@ -141,6 +142,9 @@ const updaterId = async (req, res) =>{
   }
 }
 
+
+
+
 const getallstudents = async (req, res) =>{
   try {
     const allstudents = await studentmodel.find({});
@@ -161,7 +165,31 @@ const getallstudents = async (req, res) =>{
   }
 }
 
+const payments = async (req, res) => {
+  try {
+    const response = await axios.post(
+      '/udemy/student/payment',
+      req.body,
+      {
+        headers: {
+          'Authorization': `Bearer FLWSECK_TEST-24fa9164de32111749644bf09746187f-X`, 
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error:', error.response ? error.response.data : error.message);
+    res.status(error.response?.status || 500).json({
+      message: error.response?.data?.message || 'An error occurred',
+      error: error.response?.data || error.message
+    });
+  }
+};
 
 
 
-module.exports = {studentsignup, updaterId, getloggin, studentlogin, getallstudents, getData, getstudentlogin, getstudentsignup, studentdash}
+
+
+
+module.exports = {studentsignup, updaterId, getloggin, studentlogin, payments, getallstudents, getData, getstudentlogin, getstudentsignup, studentdash}
