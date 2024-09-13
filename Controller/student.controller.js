@@ -5,6 +5,7 @@ const axios = require('axios')
 
 
 
+
 const studentsignup = async(req, res) =>{
   try {
       // console.log( req.body, "body");
@@ -39,7 +40,7 @@ const studentsignup = async(req, res) =>{
   }
 }
   
-    const studentlogin = async (req, res) => {
+const studentlogin = async (req, res) => {
       const { email, password } = req.body;
       // console.log(req.body);
       try {
@@ -74,7 +75,7 @@ const studentsignup = async(req, res) =>{
         return res.status(408).send({ message: 'internal server error' });
       }
     }
-    
+
 
 const studentdash = (req, res)=>{
     res.render("index12")
@@ -165,31 +166,8 @@ const getallstudents = async (req, res) =>{
   }
 }
 
-const payments = async (req, res) => {
-  try {
-    const response = await axios.post(
-      '/udemy/student/payment',
-      req.body,
-      {
-        headers: {
-          'Authorization': `Bearer FLWSECK_TEST-24fa9164de32111749644bf09746187f-X`, 
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    res.json(response.data);
-  } catch (error) {
-    console.error('Error:', error.response ? error.response.data : error.message);
-    res.status(error.response?.status || 500).json({
-      message: error.response?.data?.message || 'An error occurred',
-      error: error.response?.data || error.message
-    });
-  }
-};
 
 
 
 
-
-
-module.exports = {studentsignup, updaterId, getloggin, studentlogin, payments, getallstudents, getData, getstudentlogin, getstudentsignup, studentdash}
+module.exports = {studentsignup, updaterId, getloggin, studentlogin, getallstudents, getData, getstudentlogin, getstudentsignup, studentdash}

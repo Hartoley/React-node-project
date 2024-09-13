@@ -17,13 +17,9 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 app.use('/', adminrouter)
 app.use('/udemy', studentrouter)
 app.use('/courses', courserouter)
-const proxy = createProxyMiddleware({
-   target: 'https://api.flutterwave.com/v3/payments/initialize',
-   changeOrigin: true,
-   pathRewrite: { '^/udemy/student/payment': '' },
- });
+
  
- app.use('/udemy/student/payment', proxy);
+
 
 
 
