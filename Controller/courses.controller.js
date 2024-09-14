@@ -184,10 +184,6 @@ const getcourses =(req, res) =>{
     try {
       const course = req.params.courseId;
       const adminIn = await coursemodel.findById(course);
-      if (!course) {
-        return res.status(404).send("course not found");
-      }
-   
       res.send(adminIn);
      } catch (error) {
       return res.status(408).send("course not found shoooo");

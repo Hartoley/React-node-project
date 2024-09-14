@@ -145,6 +145,43 @@ const updaterId = async (req, res) =>{
 
 
 
+const paidCourses = async (req, res) => {
+  try {
+    const { courseTitle, courseId, userId } = req.body;
+    const student = await studentmodel.findByIdAndUpdate(userId, {
+      $push: {
+        courses: {
+          courseId: courseId,
+          courseTitle: courseTitle,
+          paid: true,
+          certified: false
+        }
+      }
+    }, { new: true });
+    if (!student) {
+      return res.status(404).send("user not found");
+    }
+    res.json({ message: "Course added successfully" });
+  } catch (error) {
+    return res.status(408).send("Error updating user");
+  }
+};
+
+const getAllPaidCourses = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const student = await studentmodel.findById(userId);
+    if (!student) {
+      return res.status(404).send("User not found");
+    }
+    res.json(student.courses);
+  } catch (error) {
+    return res.status(500).send("Error fetching courses");
+  }
+};
+
+
+
 
 const getallstudents = async (req, res) =>{
   try {
@@ -170,4 +207,4 @@ const getallstudents = async (req, res) =>{
 
 
 
-module.exports = {studentsignup, updaterId, getloggin, studentlogin, getallstudents, getData, getstudentlogin, getstudentsignup, studentdash}
+module.exports = {studentsignup, getAllPaidCourses, updaterId,paidCourses, getloggin, studentlogin, getallstudents, getData, getstudentlogin, getstudentsignup, studentdash}

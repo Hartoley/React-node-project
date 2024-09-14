@@ -7,6 +7,7 @@ const studentschema = new mongoose.Schema({
   email: { type: String, unique: true, required: true, trim: true },
   password: { type: String, required: true, trim: true },
   courses: [{type: Object, trim: true}],
+  certificates: [{type: Object, trim: true}],
 });
 
 const stdloginschema = new mongoose.Schema({
@@ -14,13 +15,7 @@ const stdloginschema = new mongoose.Schema({
   password: { type: String, required: true, trim: true },
 });
 
-const paymentschema =new mongoose.Schema({
-  email: { type: String, unique: true, required: true, trim: true },
-  courseTitle: {type: Object, trim: true},
-  paid: {type:Boolean, trim:false},
-  certified:{type:Boolean, trim:true},
-  reference: {type: String, unique: true, required: true, trim: true}
-})
+
 
 let saltRound = 10;
 studentschema.pre("save", function (next) {
