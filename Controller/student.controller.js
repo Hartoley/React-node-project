@@ -147,8 +147,8 @@ const updaterId = async (req, res) =>{
 
 const paidCourses = async (req, res) => {
   try {
-    const { courseTitle, courseId, userId } = req.body;
-    const student = await studentmodel.findByIdAndUpdate(userId, {
+    const { courseTitle, courseId, id } = req.body;
+    const student = await studentmodel.findByIdAndUpdate(id, {
       $push: {
         courses: {
           courseId: courseId,
@@ -169,8 +169,8 @@ const paidCourses = async (req, res) => {
 
 const getAllPaidCourses = async (req, res) => {
   try {
-    const { userId } = req.body;
-    const student = await studentmodel.findById(userId);
+    const id = req.params.id;
+    const student = await studentmodel.findById(id);
     if (!student) {
       return res.status(404).send("User not found");
     }

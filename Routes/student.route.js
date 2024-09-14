@@ -2,7 +2,7 @@ const express = require("express")
 const router = express.Router()
 const {validate} = require("../Middleware/validator")
 const {adminvalidator} = require ("../Middleware/adminvalidator")
-const { studentsignup, studentlogin, getstudentsignup, getstudentlogin, studentdash, getData , updaterId, getallstudents, paidCourses } = require("../Controller/student.controller")
+const { studentsignup, studentlogin, getstudentsignup, getstudentlogin, studentdash, getData , updaterId, getallstudents, paidCourses, getAllPaidCourses } = require("../Controller/student.controller")
 
 
 router.get('/udemy', studentdash)
@@ -14,6 +14,7 @@ router.get('/student/getdata', getData)
 router.get('/student/getallstudent', getallstudents)
 router.get('/student/getdata/id/:id', updaterId)
 router.post('/student/payment', paidCourses)
+router.get('/student/paidCourses/id/:id', getAllPaidCourses)
 
 
 
