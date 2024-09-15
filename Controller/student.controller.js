@@ -1,7 +1,9 @@
 const { adminvalidator } = require("../Middleware/adminvalidator");
 const {studentmodel, studentlogmodel} = require("../Model/student.model")
+const {coursemodel} = require ('../Model/courses.model')
 const bcrypt = require("bcryptjs")
-const axios = require('axios')
+const axios = require('axios');
+const { Reference } = require("yup");
 
 
 
@@ -147,13 +149,17 @@ const updaterId = async (req, res) =>{
 
 const paidCourses = async (req, res) => {
   try {
-    const { courseTitle, courseId, id } = req.body;
-    const student = await studentmodel.findByIdAndUpdate(id, {
+    const { courseTitle, courseId, userId, reference } = req.body;
+    console.log(userId);
+    console.log(courseTitle , userId , courseId );
+    
+    const student = await studentmodel.findByIdAndUpdate(userId, {
       $push: {
         courses: {
           courseId: courseId,
           courseTitle: courseTitle,
           paid: true,
+          Reference: reference,
           certified: false
         }
       }
@@ -162,21 +168,29 @@ const paidCourses = async (req, res) => {
       return res.status(404).send("user not found");
     }
     res.json({ message: "Course added successfully" });
-  } catch (error) {
-    return res.status(408).send("Error updating user");
+  }catch (error) {
+    console.error("Error updating user:", error.message, error.stack);
+    return res.status(500).send("Error updating user");
   }
 };
+
 
 const getAllPaidCourses = async (req, res) => {
   try {
     const id = req.params.id;
+
     const student = await studentmodel.findById(id);
     if (!student) {
       return res.status(404).send("User not found");
     }
-    res.json(student.courses);
+
+    const courseIds = student.courses.map(course => course.courseId);
+    const courses = await coursemodel.find({ _id: { $in: courseIds } });
+    res.status(200).send(courses);
+    
   } catch (error) {
-    return res.status(500).send("Error fetching courses");
+    console.error("Error fetching courses:", error.message);
+    res.status(500).send("Error fetching courses");
   }
 };
 
@@ -193,7 +207,7 @@ const getallstudents = async (req, res) =>{
     } else {
       
       allstudents.forEach((students) => {
-        console.log(students.username);
+        // console.log(students.username);
       });
       res.status(200).send(allstudents); 
     }
