@@ -28,6 +28,8 @@ const courseschema = new mongoose.Schema({
     star:  { type: Boolean, default: false },
     subScriber: { type: Number, trim: true, default: 0, },
 
+
+
     
   });
 

@@ -194,7 +194,37 @@ const getAllPaidCourses = async (req, res) => {
   }
 };
 
+const videoProgress = async (req, res)=>{
+  const { userId, courseId, videoId, index } = req.body;
 
+  try {
+    const student = await studentmodel.findOne({ _id: userId });
+
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    const course = student.courses.find(course => course.courseId.toString() === courseId);
+
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    const progressEntry = course.progress.find(p => p.videoId.toString() === videoId);
+    if (progressEntry) {
+      progressEntry.index = index; 
+    } else {
+      course.progress.push({ videoId, index }); 
+    }
+
+    await student.save();
+
+    res.status(200).json({ message: 'Progress updated successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error updating progress' });
+  }
+}
 
 
 const getallstudents = async (req, res) =>{
@@ -221,4 +251,4 @@ const getallstudents = async (req, res) =>{
 
 
 
-module.exports = {studentsignup, getAllPaidCourses, updaterId,paidCourses, getloggin, studentlogin, getallstudents, getData, getstudentlogin, getstudentsignup, studentdash}
+module.exports = {studentsignup, videoProgress, getAllPaidCourses, updaterId,paidCourses, getloggin, studentlogin, getallstudents, getData, getstudentlogin, getstudentsignup, studentdash}
