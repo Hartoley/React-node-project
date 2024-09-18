@@ -16,7 +16,7 @@ router.get('/student/getdata/id/:id', updaterId)
 router.post('/student/payment', paidCourses)
 router.get('/student/paidCourses/id/:id', getAllPaidCourses)
 router.post('/student/updateProgress', videoProgress)
-router.get('/student/isWatched/:userId/:courseId/:videoId', isVideoWatched);
+router.post('/student/isWatched', isVideoWatched);
 
 
 module.exports = router

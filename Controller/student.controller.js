@@ -259,7 +259,7 @@ const getallstudents = async (req, res) =>{
 }
 
 const isVideoWatched = async (req, res) => {
-  const { userId, courseId, videoId } = req.params; 
+  const { userId, courseId, videoId } = req.body;
 
   if (!userId || !courseId || !videoId) {
     return res.status(400).json({ message: 'Missing required fields' });
@@ -272,24 +272,22 @@ const isVideoWatched = async (req, res) => {
     });
 
     if (!progressEntry) {
-      return res.status(404).json({ message: 'No progress entry found for this user and course' });
+      return res.status(200).json({ watched: false });
     }
-
-    const videoProgress = progressEntry.progress.find(video => video.videoId.toString() === videoId);
+    const videoProgress = progressEntry.progress.find(p => p.videoId.toString() === videoId);
 
     if (videoProgress) {
-      return res.status(200).json({ 
-        message: 'Video status retrieved successfully', 
-        watched: videoProgress.watched 
-      });
+      return res.status(200).json({ watched: videoProgress.watched });
     } else {
-      return res.status(404).json({ message: 'Video not found in progress' });
+
+      return res.status(200).json({ watched: false });
     }
   } catch (error) {
     console.error('Error checking video status:', error);
     return res.status(500).json({ message: 'Error checking video status' });
   }
 };
+
 
 
 
