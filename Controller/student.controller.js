@@ -292,7 +292,7 @@ const checkCertificationEligibility = async (req, res) => {
   try {
     const course = await coursemodel.findById(courseId);
     if (!course) {
-      return res.status(404).json({ success: false, message: 'Course not found' });
+      return res.status(200).json({ failed: true, message: 'You are almost there' });
     }
 
     const progressEntry = await courseProgress.findOne({
@@ -301,7 +301,7 @@ const checkCertificationEligibility = async (req, res) => {
     });
 
     if (!progressEntry) {
-      return res.status(404).json({ success: false, message: 'No progress found for this student in the course' });
+      return res.status(200).json({ failed: true, message: 'You are almost there' });
     }
 
     const allVideos = course.videos;
@@ -313,9 +313,9 @@ const checkCertificationEligibility = async (req, res) => {
     });
 
     if (allWatched) {
-      return res.status(200).json({ success: true, message: 'Student is eligible for certification.' });
+      return res.status(200).json({ failed: true, message: 'Student is eligible for certification.' });
     } else {
-      return res.status(400).json({ success: false, message: 'Not all videos have been watched.' });
+      return res.status(200).json({ failed: true, message: 'Not all videos have been watched.' });
     }
   } catch (error) {
     console.error('Error checking certification eligibility:', error);
