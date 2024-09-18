@@ -2,7 +2,7 @@ const express = require("express")
 const router = express.Router()
 const {validate} = require("../Middleware/validator")
 const {adminvalidator} = require ("../Middleware/adminvalidator")
-const { studentsignup, studentlogin, getstudentsignup, getstudentlogin, studentdash, getData , updaterId, getallstudents, paidCourses, getAllPaidCourses, videoProgress, isVideoWatched, } = require("../Controller/student.controller")
+const { studentsignup, studentlogin, getstudentsignup, getstudentlogin, studentdash, getData , updaterId, getallstudents, paidCourses, getAllPaidCourses, videoProgress, isVideoWatched, checkCertificationEligibility, } = require("../Controller/student.controller")
 
 
 router.get('/udemy', studentdash)
@@ -17,6 +17,7 @@ router.post('/student/payment', paidCourses)
 router.get('/student/paidCourses/id/:id', getAllPaidCourses)
 router.post('/student/updateProgress', videoProgress)
 router.post('/student/isWatched', isVideoWatched);
+router.post('/student/certification', checkCertificationEligibility);
 
 
 module.exports = router

@@ -203,7 +203,7 @@ const videoProgress = async (req, res) => {
 
   try {
     let progressEntry = await courseProgress.findOne({
-      studentId: userId,
+      userId: userId,
       courseId: courseId,
     });
 
@@ -260,11 +260,9 @@ const getallstudents = async (req, res) =>{
 
 const isVideoWatched = async (req, res) => {
   const { userId, courseId, videoId } = req.body;
-
   if (!userId || !courseId || !videoId) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
-
   try {
     const progressEntry = await courseProgress.findOne({
       studentId: userId,
@@ -289,9 +287,43 @@ const isVideoWatched = async (req, res) => {
 };
 
 
+const checkCertificationEligibility = async (req, res) => {
+  const { userId, courseId } = req.body;
+  try {
+    const course = await coursemodel.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Course not found' });
+    }
+
+    const progressEntry = await courseProgress.findOne({
+      studentId: userId, 
+      courseId: courseId,
+    });
+
+    if (!progressEntry) {
+      return res.status(404).json({ success: false, message: 'No progress found for this student in the course' });
+    }
+
+    const allVideos = course.videos;
+    const watchedVideos = progressEntry.progress;
+
+    const allWatched = allVideos.every(video => {
+      const videoProgress = watchedVideos.find(v => v.videoId.toString() === video._id.toString());
+      return videoProgress && videoProgress.watched;
+    });
+
+    if (allWatched) {
+      return res.status(200).json({ success: true, message: 'Student is eligible for certification.' });
+    } else {
+      return res.status(400).json({ success: false, message: 'Not all videos have been watched.' });
+    }
+  } catch (error) {
+    console.error('Error checking certification eligibility:', error);
+    return res.status(500).json({ success: false, message: 'An error occurred while checking eligibility.' });
+  }
+};
 
 
 
 
-
-module.exports = {studentsignup, videoProgress, isVideoWatched, getAllPaidCourses, updaterId,paidCourses, getloggin, studentlogin, getallstudents, getData, getstudentlogin, getstudentsignup, studentdash}
+module.exports = {studentsignup, videoProgress, checkCertificationEligibility, isVideoWatched, getAllPaidCourses, updaterId,paidCourses, getloggin, studentlogin, getallstudents, getData, getstudentlogin, getstudentsignup, studentdash}
