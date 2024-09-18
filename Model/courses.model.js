@@ -4,11 +4,10 @@ const { string } = require("yup");
 const videoSchema = new mongoose.Schema({
   sub_title: { type: String, trim: true },
   url: { type: String, required: true },
-  watched: { type: Boolean, default: false } 
+  watched: { type: Boolean, default: false },
   duration: { type: Number, required: false },
   students:{ type: Number, trim: true, default: 0, }
 });
-
 
 const courseschema = new mongoose.Schema({
     title: {type: String,  required: true, unique: true, trim: true },

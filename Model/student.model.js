@@ -16,6 +16,19 @@ const stdloginschema = new mongoose.Schema({
 });
 
 
+const videoProgressSchema = new mongoose.Schema({
+  videoId: { type: mongoose.Schema.Types.ObjectId, ref: 'Video', required: true },
+  watched: { type: Boolean, default: false },
+  watchedAt: { type: Date, default: Date.now}
+});
+
+
+const courseProgressSchema = new mongoose.Schema({
+  studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true },
+  courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
+  progress: [videoProgressSchema], 
+});
+
 
 let saltRound = 10;
 studentschema.pre("save", function (next) {
@@ -32,7 +45,7 @@ studentschema.pre("save", function (next) {
 });
 
 
-
+const courseProgress =mongoose.model("course_progress" , courseProgressSchema)
 const studentmodel = mongoose.model("student_collection", studentschema);
 const studentlogmodel = mongoose.model("studentlog_collection", stdloginschema)
-module.exports = {studentmodel, studentlogmodel}
+module.exports = {studentmodel, studentlogmodel, courseProgress}

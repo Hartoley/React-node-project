@@ -1,5 +1,5 @@
 const { adminvalidator } = require("../Middleware/adminvalidator");
-const {studentmodel, studentlogmodel} = require("../Model/student.model")
+const {studentmodel, studentlogmodel, courseProgress} = require("../Model/student.model")
 const {coursemodel} = require ('../Model/courses.model')
 const bcrypt = require("bcryptjs")
 const axios = require('axios');
@@ -194,37 +194,48 @@ const getAllPaidCourses = async (req, res) => {
   }
 };
 
-const videoProgress = async (req, res)=>{
-  const { userId, courseId, videoId, index } = req.body;
+
+const videoProgress = async (req, res) => {
+  const { userId, courseId, videoId } = req.body;
+  if (!userId || !courseId || !videoId) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
 
   try {
-    const student = await studentmodel.findOne({ _id: userId });
+    let progressEntry = await courseProgress.findOne({
+      studentId: userId,
+      courseId: courseId,
+    });
 
-    if (!student) {
-      return res.status(404).json({ message: 'Student not found' });
+    if (!progressEntry) {
+      progressEntry = new courseProgress({
+        studentId: userId,
+        courseId: courseId,
+        progress: [{ videoId, watched: true }],
+      });
+
+      await progressEntry.save();
+      return res.status(201).json({ message: 'Progress created successfully' });
     }
 
-    const course = student.courses.find(course => course.courseId.toString() === courseId);
+    const videoProgress = progressEntry.progress.find(p => p.videoId.toString() === videoId);
 
-    if (!course) {
-      return res.status(404).json({ message: 'Course not found' });
-    }
-
-    const progressEntry = course.progress.find(p => p.videoId.toString() === videoId);
-    if (progressEntry) {
-      progressEntry.index = index; 
+    if (videoProgress) {
+      videoProgress.watched = true;
+      videoProgress.watchedAt = Date.now(); 
     } else {
-      course.progress.push({ videoId, index }); 
+      progressEntry.progress.push({ videoId, watched: true });
     }
 
-    await student.save();
-
+    await progressEntry.save();
     res.status(200).json({ message: 'Progress updated successfully' });
   } catch (error) {
-    console.error(error);
+    console.error('Error updating progress:', error);
     res.status(500).json({ message: 'Error updating progress' });
   }
-}
+};
+
+
 
 
 const getallstudents = async (req, res) =>{
@@ -247,8 +258,42 @@ const getallstudents = async (req, res) =>{
   }
 }
 
+const isVideoWatched = async (req, res) => {
+  const { userId, courseId, videoId } = req.params; 
+
+  if (!userId || !courseId || !videoId) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    const progressEntry = await courseProgress.findOne({
+      studentId: userId,
+      courseId: courseId,
+    });
+
+    if (!progressEntry) {
+      return res.status(404).json({ message: 'No progress entry found for this user and course' });
+    }
+
+    const videoProgress = progressEntry.progress.find(video => video.videoId.toString() === videoId);
+
+    if (videoProgress) {
+      return res.status(200).json({ 
+        message: 'Video status retrieved successfully', 
+        watched: videoProgress.watched 
+      });
+    } else {
+      return res.status(404).json({ message: 'Video not found in progress' });
+    }
+  } catch (error) {
+    console.error('Error checking video status:', error);
+    return res.status(500).json({ message: 'Error checking video status' });
+  }
+};
 
 
 
 
-module.exports = {studentsignup, videoProgress, getAllPaidCourses, updaterId,paidCourses, getloggin, studentlogin, getallstudents, getData, getstudentlogin, getstudentsignup, studentdash}
+
+
+module.exports = {studentsignup, videoProgress, isVideoWatched, getAllPaidCourses, updaterId,paidCourses, getloggin, studentlogin, getallstudents, getData, getstudentlogin, getstudentsignup, studentdash}
