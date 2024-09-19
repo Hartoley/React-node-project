@@ -197,13 +197,14 @@ const getAllPaidCourses = async (req, res) => {
 
 const videoProgress = async (req, res) => {
   const { userId, courseId, videoId } = req.body;
+  
   if (!userId || !courseId || !videoId) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
   try {
     let progressEntry = await courseProgress.findOne({
-      userId: userId,
+      studentId: userId,
       courseId: courseId,
     });
 
@@ -213,21 +214,22 @@ const videoProgress = async (req, res) => {
         courseId: courseId,
         progress: [{ videoId, watched: true }],
       });
-
       await progressEntry.save();
-      return res.status(201).json({ message: 'Progress created successfully' });
+      return res.status(201).json({ message: 'Progress created successfully', watched: true });
     }
 
-    const videoProgress = progressEntry.progress.find(p => p.videoId.toString() === videoId);
+    const existingVideoProgress = progressEntry.progress.find(p => p.videoId.toString() === videoId);
 
-    if (videoProgress) {
-      videoProgress.watched = true;
-      videoProgress.watchedAt = Date.now(); 
+    if (existingVideoProgress) {
+      existingVideoProgress.watched = true;
+      existingVideoProgress.watchedAt = Date.now();
     } else {
       progressEntry.progress.push({ videoId, watched: true });
     }
 
     await progressEntry.save();
+    console.log('Progress updated successfully');
+    
     res.status(200).json({ message: 'Progress updated successfully' });
   } catch (error) {
     console.error('Error updating progress:', error);
@@ -313,7 +315,7 @@ const checkCertificationEligibility = async (req, res) => {
     });
 
     if (allWatched) {
-      return res.status(200).json({ failed: true, message: 'Student is eligible for certification.' });
+      return res.status(200).json({ success: true, message: 'Student is eligible for certification.' });
     } else {
       return res.status(200).json({ failed: true, message: 'Not all videos have been watched.' });
     }
