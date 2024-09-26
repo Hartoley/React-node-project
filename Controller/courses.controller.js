@@ -73,7 +73,7 @@ const getcourses =(req, res) =>{
       });
   
       if (!newCourse) {
-        return res.status(500).send({ message: "Error creating course", status: false });
+        return res.status(505).send({ message: "Error creating course", status: false });
       }
   
       res.status(200).send({ message: "Course created", status: true, course: newCourse });
