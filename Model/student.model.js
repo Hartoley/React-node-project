@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const { object, boolean } = require("yup");
 
 const studentschema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true, trim: true },
+  username: { type: String, required: true, trim: true },
   email: { type: String, unique: true, required: true, trim: true },
   password: { type: String, required: true, trim: true },
   courses: [{type: Object, trim: true}],
