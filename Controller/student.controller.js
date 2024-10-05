@@ -106,6 +106,30 @@ const getstudentlogin = (req, res) => {
   res.render("studentlogin");
 };
 
+const getStudents = async (req, res) => {
+  const { courseId } = req.params;
+
+  try {
+    const students = await studentmodel
+      .find({
+        courses: { $elemMatch: { courseId: courseId } },
+      })
+      .select("username email courses");
+
+    res.status(200).json({
+      count: students.length,
+      students: students,
+    });
+  } catch (error) {
+    console.error("Error fetching students by course ID:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving students",
+      error: error.message,
+    });
+  }
+};
+
 const getData = async (req, res) => {
   try {
     const data = await studentmodel.find({});
@@ -453,6 +477,7 @@ const getStudentProgressData = async (req, res) => {
 
 module.exports = {
   studentsignup,
+  getStudents,
   videoProgress,
   checkCertificationEligibility,
   isVideoWatched,

@@ -17,6 +17,7 @@ const {
   isVideoWatched,
   checkCertificationEligibility,
   getStudentProgressData,
+  getStudents,
 } = require("../Controller/student.controller");
 
 router.get("/udemy", studentdash);
@@ -26,6 +27,7 @@ router.get("/studentdash", getstudentsignup);
 router.get("/student/dashlogin", getstudentlogin);
 router.get("/student/getdata", getData);
 router.get("/student/getallstudent", getallstudents);
+router.get("/student/getStudents/:courseId", getStudents);
 router.get("/student/getdata/id/:id", updaterId);
 router.post("/student/payment", paidCourses);
 router.get("/student/paidCourses/id/:id", getAllPaidCourses);
