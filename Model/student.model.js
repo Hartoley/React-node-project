@@ -6,8 +6,15 @@ const studentschema = new mongoose.Schema({
   username: { type: String, required: true, trim: true },
   email: { type: String, unique: true, required: true, trim: true },
   password: { type: String, required: true, trim: true },
-  courses: [{type: Object, trim: true}],
-  certificates: [{type: Object, trim: true}],
+  courses: [
+    {
+      courseId: String,
+      courseTitle: String,
+      paid: Boolean,
+      certified: Boolean,
+    },
+  ],
+  certificates: [{ type: Object, trim: true }],
 });
 
 const stdloginschema = new mongoose.Schema({
@@ -15,20 +22,29 @@ const stdloginschema = new mongoose.Schema({
   password: { type: String, required: true, trim: true },
 });
 
-
 const videoProgressSchema = new mongoose.Schema({
-  videoId: { type: mongoose.Schema.Types.ObjectId, ref: 'Video', required: true },
+  videoId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Video",
+    required: true,
+  },
   watched: { type: Boolean, default: false },
-  watchedAt: { type: Date, default: Date.now}
+  watchedAt: { type: Date, default: Date.now },
 });
-
 
 const courseProgressSchema = new mongoose.Schema({
-  studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Student', required: true },
-  courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
-  progress: [videoProgressSchema], 
+  studentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Student",
+    required: true,
+  },
+  courseId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Course",
+    required: true,
+  },
+  progress: [videoProgressSchema],
 });
-
 
 let saltRound = 10;
 studentschema.pre("save", function (next) {
@@ -44,8 +60,7 @@ studentschema.pre("save", function (next) {
     });
 });
 
-
-const courseProgress =mongoose.model("course_progress" , courseProgressSchema)
+const courseProgress = mongoose.model("course_progress", courseProgressSchema);
 const studentmodel = mongoose.model("student_collection", studentschema);
-const studentlogmodel = mongoose.model("studentlog_collection", stdloginschema)
-module.exports = {studentmodel, studentlogmodel, courseProgress}
+const studentlogmodel = mongoose.model("studentlog_collection", stdloginschema);
+module.exports = { studentmodel, studentlogmodel, courseProgress };

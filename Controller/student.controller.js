@@ -83,13 +83,11 @@ const studentlogin = async (req, res) => {
         console.log("Saving logged in student failed");
       }
     }
-    return res
-      .status(200)
-      .send({
-        message: "student logged in successful",
-        status: true,
-        studentemail,
-      });
+    return res.status(200).send({
+      message: "student logged in successful",
+      status: true,
+      studentemail,
+    });
   } catch (error) {
     console.log(error);
     return res.status(408).send({ message: "internal server error" });
@@ -335,12 +333,10 @@ const checkCertificationEligibility = async (req, res) => {
     });
 
     if (allWatched) {
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "Student is eligible for certification.",
-        });
+      return res.status(200).json({
+        success: true,
+        message: "Student is eligible for certification.",
+      });
     } else {
       return res
         .status(200)
@@ -348,12 +344,110 @@ const checkCertificationEligibility = async (req, res) => {
     }
   } catch (error) {
     console.error("Error checking certification eligibility:", error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: "An error occurred while checking eligibility.",
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while checking eligibility.",
+    });
+  }
+};
+
+const getStudentProgressData = async (req, res) => {
+  const { id } = req.params; // Extracting student ID from the request parameters
+  try {
+    // Fetch the student data
+    const student = await studentmodel.findById(id).lean();
+    if (!student) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    // Fetch all courses purchased by the student
+    const purchasedCourses = student.courses || []; // Ensure `courses` is an array
+
+    // Fetch course progress data
+    const courseProgressData = await courseProgress
+      .find({ studentId: id })
+      .populate({
+        path: "courseId", // Populating course details
+        model: studentmodel,
+        select: "courseName price videos", // Include necessary fields
+      })
+      .lean();
+
+    const paidCourses = [];
+    let totalWatchedVideos = 0;
+    const coursesWithNoProgress = [];
+
+    // Create a Set for fast lookup of progress entries
+    const progressCourseIds = new Set(
+      courseProgressData
+        .filter((progress) => progress.courseId) // Check if `courseId` exists
+        .map((progress) => progress.courseId._id.toString())
+    );
+
+    // Iterate through course progress data
+    for (const progress of courseProgressData) {
+      const course = progress.courseId; // Get the course data from the populated field
+
+      // Check if the course exists before accessing its properties
+      if (!course) {
+        continue; // Skip if no course found
+      }
+
+      const watchedVideosCount = progress.progress.filter(
+        (video) => video.watched
+      ).length;
+      totalWatchedVideos += watchedVideosCount;
+
+      // Check certification eligibility
+      const allVideos = course.videos || []; // Ensure `videos` is an array
+      const allWatched = allVideos.every((video) => {
+        const videoProgress = progress.progress.find(
+          (v) => v.videoId.toString() === video._id.toString()
+        );
+        return videoProgress && videoProgress.watched;
       });
+
+      // Add paid course to the response
+      paidCourses.push({
+        courseId: course._id,
+        courseName: course.courseName || "Unknown", // Fallback for courseName
+        price: course.price || 0, // Fallback for price
+        watchedVideosCount: watchedVideosCount,
+        certified: allWatched, // Add certification status
+      });
+    }
+
+    // Check for purchased courses with no progress
+    for (const course of purchasedCourses) {
+      if (!progressCourseIds.has(course.courseId.toString())) {
+        coursesWithNoProgress.push(course); // Store course IDs with no progress
+      }
+    }
+
+    // If no paid courses or progress, send a message indicating no courses purchased
+    if (paidCourses.length === 0 && coursesWithNoProgress.length === 0) {
+      return res.status(200).json({
+        message:
+          "The student hasn't paid for any courses or hasn't made any progress.",
+      });
+    }
+
+    // Create the final result object
+    const result = {
+      studentDetails: {
+        id: student._id,
+        username: student.username,
+        email: student.email,
+        totalWatchedVideos: totalWatchedVideos,
+      },
+      paidCourses: paidCourses,
+      coursesWithNoProgress: coursesWithNoProgress, // Add purchased courses with no progress
+    };
+
+    return res.status(200).json(result);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Error fetching student data" });
   }
 };
 
@@ -372,4 +466,5 @@ module.exports = {
   getstudentlogin,
   getstudentsignup,
   studentdash,
+  getStudentProgressData,
 };
