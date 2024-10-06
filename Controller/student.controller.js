@@ -330,9 +330,10 @@ const checkCertificationEligibility = async (req, res) => {
   try {
     const course = await coursemodel.findById(courseId);
     if (!course) {
-      return res
-        .status(200)
-        .json({ failed: true, message: "You are almost there" });
+      return res.status(200).json({
+        failed: true,
+        message: "Course not found. You are almost there.",
+      });
     }
 
     const progressEntry = await courseProgress.findOne({
@@ -341,9 +342,10 @@ const checkCertificationEligibility = async (req, res) => {
     });
 
     if (!progressEntry) {
-      return res
-        .status(200)
-        .json({ failed: true, message: "You are almost there" });
+      return res.status(200).json({
+        failed: true,
+        message: "No progress found. You are almost there.",
+      });
     }
 
     const allVideos = course.videos;
@@ -357,14 +359,35 @@ const checkCertificationEligibility = async (req, res) => {
     });
 
     if (allWatched) {
+      // Update the certified field in the student's courses array
+      const updateResult = await studentmodel.updateOne(
+        { _id: userId, "courses.courseId": courseId },
+        { $set: { "courses.$.certified": true } }
+      );
+
+      // Fetch the updated certification status
+      const updatedStudent = await studentmodel.findById(userId).lean();
+      const courseStatus = updatedStudent.courses.find(
+        (course) => course.courseId === courseId
+      ).certified;
+
       return res.status(200).json({
         success: true,
+        certified: courseStatus, // Return the updated certified status
         message: "Student is eligible for certification.",
       });
     } else {
-      return res
-        .status(200)
-        .json({ failed: true, message: "Not all videos have been watched." });
+      // Fetch the current certification status
+      const currentStudent = await studentmodel.findById(userId).lean();
+      const courseStatus = currentStudent.courses.find(
+        (course) => course.courseId === courseId
+      ).certified;
+
+      return res.status(200).json({
+        failed: true,
+        certified: courseStatus, // Return the current certified status
+        message: "Not all videos have been watched.",
+      });
     }
   } catch (error) {
     console.error("Error checking certification eligibility:", error);
@@ -376,15 +399,13 @@ const checkCertificationEligibility = async (req, res) => {
 };
 
 const getStudentProgressData = async (req, res) => {
-  const { id } = req.params; // Extracting student ID from the request parameters
+  const { id } = req.params;
   try {
-    // Fetch the student data
     const student = await studentmodel.findById(id).lean();
     if (!student) {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    // Fetch all courses purchased by the student
     const purchasedCourses = student.courses || []; // Ensure `courses` is an array
 
     // Fetch course progress data
@@ -401,14 +422,12 @@ const getStudentProgressData = async (req, res) => {
     let totalWatchedVideos = 0;
     const coursesWithNoProgress = [];
 
-    // Create a Set for fast lookup of progress entries
     const progressCourseIds = new Set(
       courseProgressData
-        .filter((progress) => progress.courseId) // Check if `courseId` exists
+        .filter((progress) => progress.courseId)
         .map((progress) => progress.courseId._id.toString())
     );
 
-    // Iterate through course progress data
     for (const progress of courseProgressData) {
       const course = progress.courseId; // Get the course data from the populated field
 
@@ -422,8 +441,13 @@ const getStudentProgressData = async (req, res) => {
       ).length;
       totalWatchedVideos += watchedVideosCount;
 
-      // Check certification eligibility
-      const allVideos = course.videos || []; // Ensure `videos` is an array
+      const courseDetails = await coursemodel.findById(course._id).lean();
+
+      if (!courseDetails) {
+        continue; // Skip if course details not found
+      }
+
+      const allVideos = courseDetails.videos || []; // Ensure `videos` is an array
       const allWatched = allVideos.every((video) => {
         const videoProgress = progress.progress.find(
           (v) => v.videoId.toString() === video._id.toString()
