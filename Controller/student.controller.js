@@ -477,6 +477,12 @@ const getStudentProgressData = async (req, res) => {
       return res.status(200).json({
         message:
           "The student hasn't paid for any courses or hasn't made any progress.",
+        studentDetails: {
+          id: student._id,
+          username: student.username,
+          email: student.email,
+          totalWatchedVideos: totalWatchedVideos,
+        },
       });
     }
 
