@@ -341,7 +341,7 @@ const checkCertificationEligibility = async (req, res) => {
     if (!course) {
       return res.status(200).json({
         failed: true,
-        message: "Course not found. You are almost there.",
+        message: "Kindly make your purchase to start course with us",
       });
     }
 
@@ -514,6 +514,60 @@ const getStudentProgressData = async (req, res) => {
   }
 };
 
+const approveCertification = async (req, res) => {
+  try {
+    const { studentId, courseId } = req.params;
+
+    // Fetch the student's course details
+    const student = await studentmodel.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    // Find the specific course in the student's courses
+    const course = student.courses.find((c) => c.courseId === courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found." });
+    }
+
+    if (!course.paid) {
+      return res.status(400).json({
+        message: "Certification cannot be approved for unpaid courses.",
+      });
+    }
+
+    const progress = await courseProgress
+      .findOne({
+        studentId,
+        courseId,
+      })
+      .lean();
+
+    const allVideosWatched = progress
+      ? progress.progress.every((video) => video.watched)
+      : false;
+
+    if (!allVideosWatched) {
+      return res.status(400).json({
+        message:
+          "Certification cannot be approved. Not all videos are watched.",
+      });
+    }
+
+    course.certified = true;
+    await student.save();
+
+    res.status(200).json({
+      message: "Certification approved successfully.",
+      courseId,
+      certified: course.certified,
+    });
+  } catch (error) {
+    console.error("Error approving certification:", error);
+    res.status(500).json({ message: "Internal Server Error." });
+  }
+};
+
 const deleteStudent = async (req, res) => {
   try {
     const { id } = req.params;
@@ -554,4 +608,5 @@ module.exports = {
   studentdash,
   getStudentProgressData,
   deleteStudent,
+  approveCertification,
 };

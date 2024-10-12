@@ -12,6 +12,12 @@ const studentschema = new mongoose.Schema({
       courseTitle: String,
       paid: Boolean,
       certified: Boolean,
+      Approved: String,
+      status: {
+        type: String,
+        enum: ["approved", "rejected", "pending"],
+        default: "pending",
+      },
     },
   ],
   certificates: [{ type: Object, trim: true }],
