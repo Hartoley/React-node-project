@@ -25,6 +25,15 @@ const studentsignup = async (req, res) => {
         .status(400)
         .send({ message: "unable to validate user", status: false });
     }
+    const existingusername = await studentmodel.findOne({ username: username });
+    console.log(existingusername);
+    if (existingusername) {
+      res.status(405).send({
+        message: "Username already exists, kindly pick another one",
+        status: false,
+      });
+    }
+
     const existinguser = await studentmodel.findOne({ email: email });
     console.log(existinguser);
     if (existinguser) {

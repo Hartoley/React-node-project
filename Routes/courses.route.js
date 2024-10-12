@@ -12,6 +12,7 @@ const {
   updateCourseData,
   deleteCourse,
   editCourse,
+  deleteVideo,
 } = require("../Controller/courses.controller");
 
 router.get("/courses", getcourses);
@@ -25,6 +26,7 @@ router.post(
   uploadVideos
 );
 router.delete("/delete/:courseId", deleteCourse);
+router.delete("/deletevideo/:courseId/:videoId", deleteVideo);
 router.post(
   "/edit/course/:courseId",
   upload.single("video_preview"),

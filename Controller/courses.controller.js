@@ -346,6 +346,33 @@ const updateCourseData = async (req, res) => {
   }
 };
 
+const deleteVideo = async (req, res) => {
+  try {
+    const { courseId, videoId } = req.params;
+
+    const updatedCourse = await coursemodel.findByIdAndUpdate(
+      courseId,
+      { $pull: { videos: { _id: videoId } } },
+      { new: true }
+    );
+
+    if (!updatedCourse) {
+      return res
+        .status(404)
+        .json({ message: "Course not found", status: false });
+    }
+
+    res.status(200).json({
+      message: "Video deleted successfully",
+      status: true,
+      course: updatedCourse,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getcourses,
   updateCourse,
@@ -355,4 +382,5 @@ module.exports = {
   updateCourseData,
   deleteCourse,
   editCourse,
+  deleteVideo,
 };
