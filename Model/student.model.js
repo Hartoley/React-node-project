@@ -15,8 +15,7 @@ const studentschema = new mongoose.Schema({
       Approved: String,
       status: {
         type: String,
-        enum: ["approved", "rejected", "pending"],
-        default: "pending",
+        default: "Pending",
       },
     },
   ],

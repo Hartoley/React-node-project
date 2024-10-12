@@ -367,34 +367,30 @@ const checkCertificationEligibility = async (req, res) => {
       return videoProgress && videoProgress.watched;
     });
 
+    // Fetch the current student data to get the course status
+    const currentStudent = await studentmodel.findById(userId).lean();
+    const courseData = currentStudent.courses.find(
+      (course) => course.courseId === courseId
+    );
+
     if (allWatched) {
       // Update the certified field in the student's courses array
-      const updateResult = await studentmodel.updateOne(
+      await studentmodel.updateOne(
         { _id: userId, "courses.courseId": courseId },
         { $set: { "courses.$.certified": true } }
       );
 
-      // Fetch the updated certification status
-      const updatedStudent = await studentmodel.findById(userId).lean();
-      const courseStatus = updatedStudent.courses.find(
-        (course) => course.courseId === courseId
-      ).certified;
-
       return res.status(200).json({
         success: true,
-        certified: courseStatus, // Return the updated certified status
+        certified: true,
+        status: courseData.status, // Return the status of the course
         message: "Student is eligible for certification.",
       });
     } else {
-      // Fetch the current certification status
-      const currentStudent = await studentmodel.findById(userId).lean();
-      const courseStatus = currentStudent.courses.find(
-        (course) => course.courseId === courseId
-      ).certified;
-
       return res.status(200).json({
         failed: true,
-        certified: courseStatus, // Return the current certified status
+        certified: courseData.certified,
+        status: courseData.status, // Return the status of the course
         message: "Not all videos have been watched.",
       });
     }
@@ -554,16 +550,70 @@ const approveCertification = async (req, res) => {
       });
     }
 
-    course.certified = true;
+    course.status = "Approved";
     await student.save();
 
     res.status(200).json({
       message: "Certification approved successfully.",
       courseId,
-      certified: course.certified,
+      status: course.status,
     });
   } catch (error) {
     console.error("Error approving certification:", error);
+    res.status(500).json({ message: "Internal Server Error." });
+  }
+};
+
+const declineCertification = async (req, res) => {
+  try {
+    const { studentId, courseId } = req.params;
+
+    // Fetch the student's course details
+    const student = await studentmodel.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    // Find the specific course in the student's courses
+    const course = student.courses.find((c) => c.courseId === courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found." });
+    }
+
+    if (!course.paid) {
+      return res.status(400).json({
+        message: "Certification cannot be approved for unpaid courses.",
+      });
+    }
+
+    const progress = await courseProgress
+      .findOne({
+        studentId,
+        courseId,
+      })
+      .lean();
+
+    const allVideosWatched = progress
+      ? progress.progress.every((video) => video.watched)
+      : false;
+
+    if (!allVideosWatched) {
+      return res.status(400).json({
+        message:
+          "Certification cannot be Declined. Not all videos are watched.",
+      });
+    }
+
+    course.status = "Declined";
+    await student.save();
+
+    res.status(200).json({
+      message: "Certification Declined successfully.",
+      courseId,
+      status: course.status,
+    });
+  } catch (error) {
+    console.error("Error declinging certification:", error);
     res.status(500).json({ message: "Internal Server Error." });
   }
 };
@@ -609,4 +659,5 @@ module.exports = {
   getStudentProgressData,
   deleteStudent,
   approveCertification,
+  declineCertification,
 };

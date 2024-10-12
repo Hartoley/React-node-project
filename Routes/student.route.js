@@ -20,6 +20,7 @@ const {
   getStudents,
   deleteStudent,
   approveCertification,
+  declineCertification,
 } = require("../Controller/student.controller");
 
 router.get("/udemy", studentdash);
@@ -38,6 +39,7 @@ router.post("/student/isWatched", isVideoWatched);
 router.get("/student/data/id/:id", getStudentProgressData);
 router.delete("/delete/:id", deleteStudent);
 router.post("/approve/:studentId/:courseId", approveCertification);
+router.post("/decline/:studentId/:courseId", declineCertification);
 
 router.post("/student/certification", checkCertificationEligibility);
 
