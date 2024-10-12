@@ -18,6 +18,7 @@ const {
   checkCertificationEligibility,
   getStudentProgressData,
   getStudents,
+  deleteStudent,
 } = require("../Controller/student.controller");
 
 router.get("/udemy", studentdash);
@@ -34,6 +35,7 @@ router.get("/student/paidCourses/id/:id", getAllPaidCourses);
 router.post("/student/updateProgress", videoProgress);
 router.post("/student/isWatched", isVideoWatched);
 router.get("/student/data/id/:id", getStudentProgressData);
+router.delete("/delete/:id", deleteStudent);
 
 router.post("/student/certification", checkCertificationEligibility);
 

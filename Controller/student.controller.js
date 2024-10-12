@@ -505,6 +505,28 @@ const getStudentProgressData = async (req, res) => {
   }
 };
 
+const deleteStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const Student = await studentmodel.findById(id);
+
+    if (!Student) {
+      return res
+        .status(404)
+        .json({ message: "Student not found", status: false });
+    }
+
+    await studentmodel.findByIdAndDelete(id);
+
+    return res
+      .status(200)
+      .json({ message: "Student deleted successfully", status: true });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   studentsignup,
   getStudents,
@@ -522,4 +544,5 @@ module.exports = {
   getstudentsignup,
   studentdash,
   getStudentProgressData,
+  deleteStudent,
 };
