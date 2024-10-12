@@ -87,6 +87,82 @@ const updateCourse = async (req, res) => {
   }
 };
 
+const editCourse = async (req, res) => {
+  try {
+    const {
+      title,
+      sub_title,
+      language,
+      sub_language,
+      category,
+      sub_category,
+      createdBy,
+      learn,
+      requirements,
+      description,
+      authors_name,
+      price,
+    } = req.body;
+
+    const uploadedVideo = req.file;
+    const courseId = req.params.courseId;
+
+    const existingCourse = await coursemodel.findById(courseId);
+    if (!existingCourse) {
+      return res
+        .status(404)
+        .send({ message: "Course not found", status: false });
+    }
+
+    let videoUrl = existingCourse.previewVideo;
+    if (uploadedVideo) {
+      const validVideoExtensions = ["mp4", "avi", "mov", "wmv", "flv", "mkv"];
+      const fileExtension = uploadedVideo.originalname
+        .split(".")
+        .pop()
+        .toLowerCase();
+
+      if (!validVideoExtensions.includes(fileExtension)) {
+        fs.unlinkSync(uploadedVideo.path);
+        return res.status(400).json({ message: "Invalid video file type" });
+      }
+
+      const uploadResult = await cloudinary.uploader.upload(
+        uploadedVideo.path,
+        {
+          resource_type: "video",
+        }
+      );
+      videoUrl = uploadResult.secure_url;
+    }
+
+    existingCourse.title = title;
+    existingCourse.sub_title = sub_title;
+    existingCourse.language = language;
+    existingCourse.sub_language = sub_language;
+    existingCourse.category = category;
+    existingCourse.sub_category = sub_category;
+    existingCourse.createdBy = createdBy;
+    existingCourse.learn = learn;
+    existingCourse.requirements = requirements;
+    existingCourse.description = description;
+    existingCourse.authors_name = authors_name;
+    existingCourse.price = price;
+    existingCourse.previewVideo = videoUrl;
+
+    const updatedCourse = await existingCourse.save();
+
+    res.status(200).send({
+      message: "Course updated successfully",
+      status: true,
+      course: updatedCourse,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: error.message });
+  }
+};
+
 const deleteCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -114,7 +190,6 @@ const uploadVideos = async (req, res) => {
   const courseMain = req.params.courseId;
   const uploadedVideo = req.file;
 
-  // console.log(sub_title);
   console.log("uploadedVideo:", uploadedVideo);
   console.log("Uploaded file path:", uploadedVideo.path);
 
@@ -279,4 +354,5 @@ module.exports = {
   getCourseData,
   updateCourseData,
   deleteCourse,
+  editCourse,
 };

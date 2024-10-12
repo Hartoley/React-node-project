@@ -11,7 +11,7 @@ const videoSchema = new mongoose.Schema({
 
 const courseschema = new mongoose.Schema({
   title: { type: String, required: true, unique: true, trim: true },
-  subtitle: { type: String, trim: true },
+  sub_title: { type: String, trim: true },
   language: [{ type: String, trim: true }],
   sub_language: [{ type: String }],
   category: [{ type: String }],
