@@ -156,27 +156,30 @@ const updaterId = async (req, res) => {
 const notification = async (req, res) => {
   try {
     const certifiedStudents = await studentmodel
-      .find({
-        "courses.certified": true,
-      })
+      .find({ "courses.certified": true })
       .lean();
 
     const notifications = [];
+
     certifiedStudents.forEach((student) => {
       student.courses.forEach((course) => {
+        const isNewNotification =
+          course.certified &&
+          (!course.status || course.status.toLowerCase() === "pending");
+
         if (course.certified) {
           notifications.push({
-            message: `Student ${student.username} is now certified in "${course.courseTitle}"!`,
+            message: `Student ${student.username} is now eligible for certification in "${course.courseTitle}"!`,
             studentId: student._id,
             courseId: course.courseId,
             courseTitle: course.courseTitle,
-            status: course.status,
+            status: course.status || "No status",
+            isNew: isNewNotification,
           });
         }
       });
     });
 
-    // Return all data separately
     return res.status(200).json({
       success: true,
       certifiedStudents, // Optionally return the entire student object if needed
