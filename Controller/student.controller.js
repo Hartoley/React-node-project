@@ -367,14 +367,12 @@ const checkCertificationEligibility = async (req, res) => {
       return videoProgress && videoProgress.watched;
     });
 
-    // Fetch the current student data to get the course status
     const currentStudent = await studentmodel.findById(userId).lean();
     const courseData = currentStudent.courses.find(
       (course) => course.courseId === courseId
     );
 
     if (allWatched) {
-      // Update the certified field in the student's courses array
       await studentmodel.updateOne(
         { _id: userId, "courses.courseId": courseId },
         { $set: { "courses.$.certified": true } }
