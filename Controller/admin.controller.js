@@ -194,6 +194,68 @@ const notification = async (req, res) => {
   }
 };
 
+const studentNotifications = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const student = await studentmodel
+      .findOne({ _id: studentId, "courses.certified": true })
+      .lean();
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "No new notification.",
+      });
+    }
+
+    const notifications = [];
+
+    student.courses.forEach((course) => {
+      const isNewNotification =
+        course.certified &&
+        (!course.status || course.status.toLowerCase() === "pending");
+
+      if (isNewNotification) {
+        notifications.push({
+          message: `You are eligible for certification in "${course.courseTitle}", but it's waiting for admin approval.`,
+          courseId: course.courseId,
+          courseTitle: course.courseTitle,
+          status: "Pending Approval",
+          isNew: true,
+        });
+      } else if (course.status?.toLowerCase() === "approved") {
+        notifications.push({
+          message: `Your certification for "${course.courseTitle}" has been approved!`,
+          courseId: course.courseId,
+          courseTitle: course.courseTitle,
+          status: "Approved",
+          isNew: false,
+        });
+      } else if (course.status?.toLowerCase() === "declined") {
+        notifications.push({
+          message: `Your certification request for "${course.courseTitle}" was declined.`,
+          courseId: course.courseId,
+          courseTitle: course.courseTitle,
+          status: "Declined",
+          isNew: false,
+        });
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      studentId: student._id,
+      notifications,
+    });
+  } catch (error) {
+    console.error("Error fetching student notifications:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while fetching student notifications.",
+    });
+  }
+};
+
 module.exports = {
   admindash,
   adminsignup,
@@ -204,4 +266,5 @@ module.exports = {
   getloggin,
   updaterId,
   notification,
+  studentNotifications,
 };
