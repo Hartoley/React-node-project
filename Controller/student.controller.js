@@ -51,11 +51,12 @@ const studentsignup = async (req, res) => {
       });
     }
 
-    // Create the user with plain text password
+    // Hash the password and create the user
+    const hashedPassword = await bcrypt.hash(password, 10);
     const student = await studentmodel.create({
       username,
       email,
-      password, // Storing plain text password
+      password: hashedPassword,
     });
 
     if (!student) {
@@ -82,56 +83,47 @@ const studentsignup = async (req, res) => {
 
 const studentlogin = async (req, res) => {
   const { email, password } = req.body;
-
+  // console.log(req.body);
   try {
-    // Check for empty input fields
-    if (!email || !password) {
-      return res.status(400).send({
-        message: "Input fields cannot be empty",
-        status: false,
-      });
+    if (email === "" || password === "") {
+      return res
+        .status(401)
+        .send({ message: "input fields cannot be empty", status: false });
     }
 
-    // Fetch student by email
-    const student = await studentmodel.findOne({ email });
+    const student = await studentmodel.findOne({ email: email });
     if (!student) {
-      console.log("User not found for email:", email);
-      return res.status(404).send({
-        message: "User not found",
-        status: false,
-      });
+      return res.status(403).send({ message: "user not found", status: false });
     }
 
-    // Compare plain text password
-    console.log("Entered password:", password);
-    console.log("Stored password:", student.password);
-
-    if (password !== student.password) {
-      console.log("Password comparison failed");
-      return res.status(401).send({
-        message: "Invalid password",
-        status: false,
-      });
+    const hashpassword = await bcrypt.compare(password, student.password);
+    if (!hashpassword) {
+      return res
+        .status(405)
+        .send({ message: "invalid password", status: false });
     }
 
-    // Log login if not already logged in
-    let loggedInStudent = await studentlogmodel.findOne({ email });
-    if (!loggedInStudent) {
-      loggedInStudent = await studentlogmodel.create({
+    const studentemail = student.email;
+    const inalrealdy = await studentlogmodel.findOne({ email: email });
+
+    if (!inalrealdy) {
+      const loggedinstudents = await studentlogmodel.create({
         email,
-        loggedInAt: new Date(),
+        password,
       });
-      console.log("Login recorded successfully");
+      console.log("It was a success");
+      if (!loggedinstudents) {
+        console.log("Saving logged in student failed");
+      }
     }
-
     return res.status(200).send({
-      message: "Student logged in successfully",
+      message: "student logged in successful",
       status: true,
-      studentemail: student.email,
+      studentemail,
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).send({ message: "Internal server error" });
+    console.log(error);
+    return res.status(408).send({ message: "internal server error" });
   }
 };
 
