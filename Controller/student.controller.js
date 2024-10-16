@@ -11,49 +11,67 @@ const { Reference } = require("yup");
 
 const studentsignup = async (req, res) => {
   try {
-    // console.log( req.body, "body");
     const { username, email, password } = req.body;
-    if (username === "" || password === "" || email === "") {
-      res
-        .status(402)
-        .send({ message: "input fields cannot be empty", status: false });
+
+    if (!username || !password || !email) {
+      return res.status(402).send({
+        message: "Input fields cannot be empty",
+        status: false,
+      });
     }
 
-    const validate = await adminvalidator.validate(req.body);
-    if (!validate) {
-      res
-        .status(400)
-        .send({ message: "unable to validate user", status: false });
+    try {
+      await adminvalidator.validate(req.body);
+    } catch (err) {
+      return res.status(400).send({
+        message: "Unable to validate user",
+        status: false,
+      });
     }
-    const existingusername = await studentmodel.findOne({ username: username });
-    console.log(existingusername);
-    if (existingusername) {
-      res.status(405).send({
+
+    const existingUsername = await studentmodel.findOne({ username });
+    if (existingUsername) {
+      return res.status(405).send({
         message: "Username already exists, kindly pick another one",
         status: false,
       });
     }
 
-    const existinguser = await studentmodel.findOne({ email: email });
-    console.log(existinguser);
-    if (existinguser) {
-      res.status(405).send({ message: "user already exist", status: false });
-    }
-    const student = await studentmodel.create({ username, email, password });
-    if (!student) {
-      res.status(403).send({ message: "unable to save user", status: false });
+    const existingUser = await studentmodel.findOne({ email });
+    if (existingUser) {
+      return res.status(405).send({
+        message: "User already exists",
+        status: false,
+      });
     }
 
-    return res
-      .status(200)
-      .send({ message: "user signed up successfully", status: true });
-  } catch (error) {
-    console.log(error);
-    if (error.code === 11000) {
-      res.status(409).send({ message: "user already exists with this email" });
-    } else {
-      res.status(500).send({ message: "internal server error" });
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const student = await studentmodel.create({
+      username,
+      email,
+      password: hashedPassword,
+    });
+
+    if (!student) {
+      return res.status(403).send({
+        message: "Unable to save user",
+        status: false,
+      });
     }
+
+    return res.status(200).send({
+      message: "User signed up successfully",
+      status: true,
+    });
+  } catch (error) {
+    console.error(error);
+    if (error.code === 11000) {
+      return res.status(409).send({
+        message: "User already exists with this email",
+      });
+    }
+    return res.status(500).send({ message: "Internal server error" });
   }
 };
 
