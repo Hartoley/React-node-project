@@ -51,12 +51,11 @@ const studentsignup = async (req, res) => {
       });
     }
 
-    // Hash the password and create the user
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Create the user with plain text password
     const student = await studentmodel.create({
       username,
       email,
-      password: hashedPassword,
+      password, // Storing plain text password
     });
 
     if (!student) {
@@ -96,20 +95,19 @@ const studentlogin = async (req, res) => {
     // Fetch student by email
     const student = await studentmodel.findOne({ email });
     if (!student) {
-      console.log("User not found for email:", email); // Log email
+      console.log("User not found for email:", email);
       return res.status(404).send({
         message: "User not found",
         status: false,
       });
     }
 
-    // Compare password
-    console.log("Entered password:", password); // Plain text password
-    console.log("Stored password hash:", student.password); // Hashed password
+    // Compare plain text password
+    console.log("Entered password:", password);
+    console.log("Stored password:", student.password);
 
-    const isPasswordValid = await bcrypt.compare(password, student.password);
-    if (!isPasswordValid) {
-      console.log("Password comparison failed"); // Log failed comparison
+    if (password !== student.password) {
+      console.log("Password comparison failed");
       return res.status(401).send({
         message: "Invalid password",
         status: false,
