@@ -85,7 +85,7 @@ const studentlogin = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Input field validation
+    // Check for empty input fields
     if (!email || !password) {
       return res.status(400).send({
         message: "Input fields cannot be empty",
@@ -93,25 +93,30 @@ const studentlogin = async (req, res) => {
       });
     }
 
-    // Check if the student exists
+    // Fetch student by email
     const student = await studentmodel.findOne({ email });
     if (!student) {
+      console.log("User not found for email:", email); // Log email
       return res.status(404).send({
         message: "User not found",
         status: false,
       });
     }
 
-    // Verify the password
+    // Compare password
+    console.log("Entered password:", password); // Plain text password
+    console.log("Stored password hash:", student.password); // Hashed password
+
     const isPasswordValid = await bcrypt.compare(password, student.password);
     if (!isPasswordValid) {
+      console.log("Password comparison failed"); // Log failed comparison
       return res.status(401).send({
         message: "Invalid password",
         status: false,
       });
     }
 
-    // Log student login if not already logged in
+    // Log login if not already logged in
     let loggedInStudent = await studentlogmodel.findOne({ email });
     if (!loggedInStudent) {
       loggedInStudent = await studentlogmodel.create({
