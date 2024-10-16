@@ -12,7 +12,6 @@ const {
   getloggin,
   updaterId,
   notification,
-  studentNotifications,
 } = require("../Controller/admin.controller");
 
 router.get("/", admindash);
@@ -24,6 +23,5 @@ router.get("/admin/getdata", getData);
 router.get("/admin/notifications", notification);
 router.get("/admin/getdata/id/:id", updaterId);
 router.get("/admin/getlogin/:id", getloggin);
-router.get("/students/notifications/:studentId", studentNotifications);
 
 module.exports = router;
