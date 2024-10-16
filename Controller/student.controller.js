@@ -51,12 +51,10 @@ const studentsignup = async (req, res) => {
       });
     }
 
-    // Hash the password and create the user
-    const hashedPassword = await bcrypt.hash(password, 10);
     const student = await studentmodel.create({
       username,
       email,
-      password: hashedPassword,
+      password,
     });
 
     if (!student) {
