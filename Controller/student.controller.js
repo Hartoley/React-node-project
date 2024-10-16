@@ -13,40 +13,46 @@ const studentsignup = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
+    // Input field validation
     if (!username || !password || !email) {
-      return res.status(402).send({
+      return res.status(400).send({
         message: "Input fields cannot be empty",
         status: false,
       });
     }
 
+    // Validate request body with Yup
     try {
       await adminvalidator.validate(req.body);
     } catch (err) {
       return res.status(400).send({
-        message: "Unable to validate user",
+        message: "Invalid input data",
         status: false,
       });
     }
 
-    const existingUsername = await studentmodel.findOne({ username });
+    // Check for existing username or email
+    const [existingUsername, existingUser] = await Promise.all([
+      studentmodel.findOne({ username }),
+      studentmodel.findOne({ email }),
+    ]);
+
     if (existingUsername) {
-      return res.status(405).send({
+      return res.status(409).send({
         message: "Username already exists, kindly pick another one",
         status: false,
       });
     }
 
-    const existingUser = await studentmodel.findOne({ email });
     if (existingUser) {
-      return res.status(405).send({
-        message: "User already exists",
+      return res.status(409).send({
+        message: "Email already registered",
         status: false,
       });
     }
 
+    // Hash the password and create the user
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const student = await studentmodel.create({
       username,
       email,
@@ -54,13 +60,13 @@ const studentsignup = async (req, res) => {
     });
 
     if (!student) {
-      return res.status(403).send({
+      return res.status(500).send({
         message: "Unable to save user",
         status: false,
       });
     }
 
-    return res.status(200).send({
+    return res.status(201).send({
       message: "User signed up successfully",
       status: true,
     });
@@ -68,7 +74,7 @@ const studentsignup = async (req, res) => {
     console.error(error);
     if (error.code === 11000) {
       return res.status(409).send({
-        message: "User already exists with this email",
+        message: "Duplicate entry: Email already exists",
       });
     }
     return res.status(500).send({ message: "Internal server error" });
@@ -77,47 +83,52 @@ const studentsignup = async (req, res) => {
 
 const studentlogin = async (req, res) => {
   const { email, password } = req.body;
-  // console.log(req.body);
+
   try {
-    if (email === "" || password === "") {
-      return res
-        .status(401)
-        .send({ message: "input fields cannot be empty", status: false });
-    }
-
-    const student = await studentmodel.findOne({ email: email });
-    if (!student) {
-      return res.status(403).send({ message: "user not found", status: false });
-    }
-
-    const hashpassword = await bcrypt.compare(password, student.password);
-    if (!hashpassword) {
-      return res
-        .status(405)
-        .send({ message: "invalid password", status: false });
-    }
-
-    const studentemail = student.email;
-    const inalrealdy = await studentlogmodel.findOne({ email: email });
-
-    if (!inalrealdy) {
-      const loggedinstudents = await studentlogmodel.create({
-        email,
-        password,
+    // Input field validation
+    if (!email || !password) {
+      return res.status(400).send({
+        message: "Input fields cannot be empty",
+        status: false,
       });
-      console.log("It was a success");
-      if (!loggedinstudents) {
-        console.log("Saving logged in student failed");
-      }
     }
+
+    // Check if the student exists
+    const student = await studentmodel.findOne({ email });
+    if (!student) {
+      return res.status(404).send({
+        message: "User not found",
+        status: false,
+      });
+    }
+
+    // Verify the password
+    const isPasswordValid = await bcrypt.compare(password, student.password);
+    if (!isPasswordValid) {
+      return res.status(401).send({
+        message: "Invalid password",
+        status: false,
+      });
+    }
+
+    // Log student login if not already logged in
+    let loggedInStudent = await studentlogmodel.findOne({ email });
+    if (!loggedInStudent) {
+      loggedInStudent = await studentlogmodel.create({
+        email,
+        loggedInAt: new Date(),
+      });
+      console.log("Login recorded successfully");
+    }
+
     return res.status(200).send({
-      message: "student logged in successful",
+      message: "Student logged in successfully",
       status: true,
-      studentemail,
+      studentemail: student.email,
     });
   } catch (error) {
-    console.log(error);
-    return res.status(408).send({ message: "internal server error" });
+    console.error(error);
+    return res.status(500).send({ message: "Internal server error" });
   }
 };
 
