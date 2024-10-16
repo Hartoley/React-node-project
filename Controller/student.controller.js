@@ -99,7 +99,7 @@ const studentlogin = async (req, res) => {
     const hashpassword = await bcrypt.compare(password, student.password);
     if (!hashpassword) {
       return res
-        .status(405)
+        .status(401)
         .send({ message: "invalid password", status: false });
     }
 
