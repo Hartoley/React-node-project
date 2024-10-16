@@ -87,7 +87,7 @@ const studentlogin = async (req, res) => {
   try {
     if (email === "" || password === "") {
       return res
-        .status(401)
+        .status(405)
         .send({ message: "input fields cannot be empty", status: false });
     }
 
