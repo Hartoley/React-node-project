@@ -10,6 +10,14 @@ const getcourses = (req, res) => {
   res.render("coursestemp");
 };
 
+const toStringArray = (value) => {
+  if (Array.isArray(value)) return value.map((i) => i.toString().trim());
+  if (typeof value === "object" && value !== null)
+    return Object.values(value).map((i) => i.toString().trim());
+  if (typeof value === "string") return value.split(",").map((i) => i.trim());
+  return [];
+};
+
 const updateCourse = async (req, res) => {
   try {
     const {
@@ -26,10 +34,10 @@ const updateCourse = async (req, res) => {
       authors_name,
       price,
     } = req.body;
+
     const uploadedVideo = req.file;
-    console.log(req.file);
-    console.log(uploadedVideo);
-    const courseExist = await coursemodel.findOne({ title: title });
+
+    const courseExist = await coursemodel.findOne({ title });
     if (courseExist) {
       return res
         .status(400)
@@ -37,9 +45,6 @@ const updateCourse = async (req, res) => {
     }
 
     const validVideoExtensions = ["mp4", "avi", "mov", "wmv", "flv", "mkv"];
-    if (validVideoExtensions) {
-      // console.log("Video format is valid");
-    }
     const fileExtension = uploadedVideo.originalname
       .split(".")
       .pop()
@@ -59,28 +64,24 @@ const updateCourse = async (req, res) => {
     const newCourse = await coursemodel.create({
       title,
       sub_title,
-      language,
-      sub_language,
-      category,
-      sub_category,
+      language: toStringArray(language),
+      sub_language: toStringArray(sub_language),
+      category: toStringArray(category),
+      sub_category: toStringArray(sub_category),
       createdBy,
-      learn,
-      requirements,
+      learn: toStringArray(learn),
+      requirements: toStringArray(requirements),
       description,
       authors_name,
       price,
       previewVideo: videoUrl,
     });
 
-    if (!newCourse) {
-      return res
-        .status(505)
-        .send({ message: "Error creating course", status: false });
-    }
-
-    res
-      .status(200)
-      .send({ message: "Course created", status: true, course: newCourse });
+    res.status(200).send({
+      message: "Course created",
+      status: true,
+      course: newCourse,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).send({ message: error.message });
@@ -138,13 +139,13 @@ const editCourse = async (req, res) => {
 
     existingCourse.title = title;
     existingCourse.sub_title = sub_title;
-    existingCourse.language = language;
-    existingCourse.sub_language = sub_language;
-    existingCourse.category = category;
-    existingCourse.sub_category = sub_category;
+    existingCourse.language = toStringArray(language);
+    existingCourse.sub_language = toStringArray(sub_language);
+    existingCourse.category = toStringArray(category);
+    existingCourse.sub_category = toStringArray(sub_category);
     existingCourse.createdBy = createdBy;
-    existingCourse.learn = learn;
-    existingCourse.requirements = requirements;
+    existingCourse.learn = toStringArray(learn);
+    existingCourse.requirements = toStringArray(requirements);
     existingCourse.description = description;
     existingCourse.authors_name = authors_name;
     existingCourse.price = price;
