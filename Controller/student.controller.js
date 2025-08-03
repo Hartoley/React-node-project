@@ -404,14 +404,16 @@ const checkCertificationEligibility = async (req, res) => {
         success: true,
         certified: true,
         status: courseData.status, // Return the status of the course
-        message: "Student is eligible for certification.",
+        message:
+          "Great news! You are now eligible for certification. Congratulations on reaching this important milestone—your efforts have truly paid off.",
       });
     } else {
       return res.status(200).json({
         failed: true,
         certified: courseData.certified,
         status: courseData.status, // Return the status of the course
-        message: "Not all videos have been watched.",
+        message:
+          "You're almost there! Watch all course videos to unlock your certification eligibility.",
       });
     }
   } catch (error) {
